@@ -1,5 +1,11 @@
 # EAR Transaction Review Tool
 
+[English](README.md) | [中文](README.zh.md)
+
+![Tests](https://github.com/ClaudiusKokoro/USA-EAR-transaction-review-tool/actions/workflows/tests.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)
+
 EAR Transaction Review Tool is a **local-first web application** that helps lawyers and export-compliance professionals perform an **initial** review of transactions that may be subject to the U.S. Export Administration Regulations (EAR).
 
 > **Legal design principle:** This tool **never** produces definitive legal conclusions such as *"this transaction is legal"*, *"no license is required"*, or *"this transaction violates the EAR"*. It collects transaction facts, identifies missing information, applies configurable rules, calculates preliminary risk scores, flags issues for manual legal review, and generates a structured review report.
@@ -437,33 +443,42 @@ pytest
 
 ---
 
-## Publishing to GitHub
-
-The repository is already prepared for public hosting:
-
-- the UI is English-only, so no localization is required for a general audience;
-- `.gitignore` excludes virtual environments, test caches, SQLite databases,
-  reports, and every local file that can contain user data or API keys
-  (`app/data/ai_config.json`, `app/data/ear_synced_lists.csv`,
-  `app/data/ear_sync_updates.csv`, `app/data/ear_sync_meta.json`);
-- the bundled `app/data/restricted_parties.csv` is clearly labeled sample data,
-  so no real restricted-party data is published;
-- launchers exist for Windows (`*.bat`) and macOS/Linux (`*.sh` / `*.command`).
-
-Suggested first push:
+## Cloning and contributing
 
 ```bash
-cd ear_transaction_review_tool
-git init
-git add .
-git commit -m "Initial public release"
-git branch -M main
-git remote add origin https://github.com/<your-account>/<your-repo>.git
-git push -u origin main
+git clone https://github.com/ClaudiusKokoro/USA-EAR-transaction-review-tool.git
+cd USA-EAR-transaction-review-tool
+
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+pytest
+streamlit run app/main.py
 ```
 
-Before pushing, double-check that `app/data/ai_config.json` and
-`app/data/ear_synced_lists.csv` do not exist in the working tree (they are
-git-ignored, so `git status` should not list them). Add a `LICENSE` file of your
-choice (for example MIT or Apache-2.0) - this project intentionally ships
-without a license so you can decide the terms yourself.
+Before opening a pull request, please make sure that:
+
+- `pytest` passes locally;
+- no API keys, synchronized list files, SQLite databases, or report output are
+  committed (`app/data/ai_config.json`, `app/data/ear_synced_lists.csv`,
+  `app/data/ear_sync_updates.csv`, `app/data/ear_sync_meta.json`, `*.db` and
+  `reports/` are all git-ignored);
+- rule changes stay in `app/rules/*.json` where possible, so they remain easy
+  for others to review and reuse.
+
+---
+
+## Disclaimer
+
+This tool provides a preliminary compliance risk assessment based on user-provided
+information and configurable rules. **It does not constitute legal advice and does
+not determine whether an export, reexport, or transfer is authorized under the
+EAR.** Screening results are reference data only - always verify parties against
+the Federal Register and the official agency lists before relying on them.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
