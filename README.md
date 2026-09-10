@@ -10,7 +10,6 @@ EAR Transaction Review Tool is a **local-first web application** that helps lawy
 
 > **Legal design principle:** This tool **never** produces definitive legal conclusions such as *"this transaction is legal"*, *"no license is required"*, or *"this transaction violates the EAR"*. It collects transaction facts, identifies missing information, applies configurable rules, calculates preliminary risk scores, flags issues for manual legal review, and generates a structured review report.
 
-<!--
 ## Screenshots
 
 | Review workbench | Party screening |
@@ -20,9 +19,6 @@ EAR Transaction Review Tool is a **local-first web application** that helps lawy
 | List & Data Center | AI assistant |
 | --- | --- |
 | ![Sync of the official screening list](docs/images/03-list-sync.png) | ![Multi-provider AI assistant](docs/images/04-ai-assistant.png) |
-
-Remove the comment markers once the images exist in `docs/images/`.
--->
 
 ---
 

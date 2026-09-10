@@ -7,6 +7,11 @@ and this project aims to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Screenshots of the review workbench, party screening, list synchronization, and
+  the AI assistant in both README files.
+
 ## [0.1.0] - 2026-09-10
 
 First public release.

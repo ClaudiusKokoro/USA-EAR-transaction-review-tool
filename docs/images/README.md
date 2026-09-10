@@ -23,7 +23,8 @@ Suggested size: about 1600 px wide, PNG.
 - Never show an API key. The provider page masks saved keys, but check the field
   before capturing.
 
-## After adding the files
+## Status
 
-Remove the `<!-- ... -->` comment markers around the **Screenshots** section in
-both README files so the images render on the repository home page.
+These four images are already wired into the **Screenshots** section of
+`README.md` and `README.zh.md`. To refresh one, replace the file using the same
+name - no README change is needed.
