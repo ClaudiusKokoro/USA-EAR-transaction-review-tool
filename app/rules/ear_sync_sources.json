@@ -1,0 +1,7 @@
+{
+  "name": "U.S. Consolidated Screening List",
+  "url": "https://data.trade.gov/downloadable_consolidated_screening_list/v1/consolidated.csv",
+  "download_page": "https://www.trade.gov/consolidated-screening-list",
+  "description": "Official daily CSV published by the U.S. International Trade Administration. Contains the BIS Entity List, Denied Persons List, Unverified List, and Military End User List along with lists maintained by State and Treasury.",
+  "updated_note": "CSL is refreshed daily at 5:00 AM EST/EDT from each sourcing federal agency."
+}

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "description": "Legal review queue routing rules. The first matching rule in this ordered list determines the queue decision.",
+  "decisions": {
+    "AUTO_REVIEW_COMPLETE": { "label": "AUTO REVIEW COMPLETE", "detail": "Preliminary automated review is complete and no routing threshold was triggered." },
+    "COMPLIANCE_REVIEW_REQUIRED": { "label": "COMPLIANCE REVIEW REQUIRED", "detail": "Compliance staff should review the transaction record and complete outstanding fact collection." },
+    "LEGAL_REVIEW_REQUIRED": { "label": "LEGAL REVIEW REQUIRED", "detail": "The transaction should be routed to an export-control attorney or specialist for legal review." },
+    "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED": { "label": "EXTERNAL COUNSEL REVIEW RECOMMENDED", "detail": "External counsel review is recommended given the severity or complexity of the flagged issues." }
+  },
+  "rules": [
+    {
+      "rule_id": "RQ-01",
+      "name": "Critical or high overall risk",
+      "condition": "risk_level == 'HIGH' or risk_level == 'CRITICAL'",
+      "decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED",
+      "explanation": "The overall preliminary risk score falls in the HIGH or CRITICAL band."
+    },
+    {
+      "rule_id": "RQ-02",
+      "name": "Manual verification of a party required",
+      "condition": "screening_has_manual_verification == true",
+      "decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED",
+      "explanation": "A party name matches or closely matches a reference-list entry and cannot be cleared by the automated tool."
+    },
+    {
+      "rule_id": "RQ-03",
+      "name": "Destination under comprehensive embargo",
+      "condition": "destination_embargoed == true",
+      "decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED",
+      "explanation": "The ultimate destination is subject to a comprehensive U.S. embargo program."
+    },
+    {
+      "rule_id": "RQ-04",
+      "name": "Elevated overall risk",
+      "condition": "risk_level == 'ELEVATED'",
+      "decision": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "The overall preliminary risk score falls in the ELEVATED band."
+    },
+    {
+      "rule_id": "RQ-05",
+      "name": "Jurisdiction review flagged",
+      "condition": "jurisdiction_status == 'JURISDICTION_REVIEW_REQUIRED' or jurisdiction_status == 'INSUFFICIENT_INFORMATION'",
+      "decision": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "EAR jurisdiction was flagged for review or could not be preliminarily assessed."
+    },
+    {
+      "rule_id": "RQ-06",
+      "name": "Foreign production dependency on U.S. items",
+      "condition": "fdp_potential == true",
+      "decision": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "A potential Foreign Direct Product issue was identified for the foreign-produced item."
+    },
+    {
+      "rule_id": "RQ-07",
+      "name": "Moderate overall risk or red flags",
+      "condition": "risk_level == 'MODERATE' or any_red_flags == true or end_use_insufficient == true or screening_has_possible_match == true",
+      "decision": "COMPLIANCE_REVIEW_REQUIRED",
+      "explanation": "Moderate risk factors, red flags, possible name matches, or incomplete end-use facts require compliance review before close-out."
+    },
+    {
+      "rule_id": "RQ-08",
+      "name": "Default auto-review complete",
+      "condition": "true",
+      "decision": "AUTO_REVIEW_COMPLETE",
+      "explanation": "No routing threshold was triggered by the recorded facts and rules."
+    }
+  ]
+}
+

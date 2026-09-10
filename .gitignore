@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Test / coverage artifacts
+.pytest_cache/
+.pytest_tmp/
+.coverage
+htmlcov/
+
+# Local application data (never commit user input, keys, or synced lists)
+*.db
+reports/
+app/data/ai_config.json
+app/data/ear_synced_lists.csv
+app/data/ear_sync_updates.csv
+app/data/ear_sync_meta.json
+
+# Streamlit secrets
+.streamlit/credentials.toml
+.streamlit/secrets.toml
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "description": "Red Flag Engine rules. Conditions use the documented rule expression syntax and are evaluated against normalized transaction facts. Rules are configurable: edit this file and restart the app.",
+  "rules": [
+    {
+      "rule_id": "RF001",
+      "name": "Unknown Ultimate End User",
+      "condition": "ultimate_end_user == null or strip(str(ultimate_end_user)) == ''",
+      "risk_points": 15,
+      "action": "ENHANCED_DUE_DILIGENCE",
+      "explanation": "The ultimate end user was not identified. Verify the end user before proceeding and determine whether enhanced due diligence is appropriate."
+    },
+    {
+      "rule_id": "RF002",
+      "name": "Unknown Ultimate Destination",
+      "condition": "ultimate_destination == null or strip(str(ultimate_destination)) == ''",
+      "risk_points": 10,
+      "action": "OBTAIN_DESTINATION_FACTS",
+      "explanation": "The ultimate destination was not identified. Destination determines which EAR provisions and embargo programs may be implicated."
+    },
+    {
+      "rule_id": "RF003",
+      "name": "Destination Under Comprehensive U.S. Embargo",
+      "condition": "destination_embargoed == true",
+      "risk_points": 25,
+      "action": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "The ultimate destination is a country subject to a comprehensive U.S. embargo program. Transactions to this destination require legal review; this tool does not determine authorization."
+    },
+    {
+      "rule_id": "RF004",
+      "name": "Military or Defense-Related Indicators",
+      "condition": "product_military_terms == true or end_use_military_indicators == true",
+      "risk_points": 20,
+      "action": "ENHANCED_DUE_DILIGENCE",
+      "explanation": "Military- or defense-related terms appear in the product description or declared end use. Additional classification and end-use scrutiny is warranted."
+    },
+    {
+      "rule_id": "RF005",
+      "name": "Possible Restricted Party Name Match",
+      "condition": "screening_has_manual_verification == true",
+      "risk_points": 25,
+      "action": "MANUAL_VERIFICATION_REQUIRED",
+      "explanation": "A screened party name matches or closely matches an entry in the loaded reference list. Manual verification of the party's identity and status is required. A name match alone never establishes that a party is restricted."
+    },
+    {
+      "rule_id": "RF006",
+      "name": "Fuzzy Name Similarity Below Verification Threshold",
+      "condition": "screening_has_possible_match == true",
+      "risk_points": 12,
+      "action": "COMPLIANCE_VERIFICATION",
+      "explanation": "A screened party name is similar to an entry in the reference list. Confirm spelling, legal entity, and ownership details before relying on the screening result."
+    },
+    {
+      "rule_id": "RF007",
+      "name": "De Minimis Ratio Near or Above Review Threshold",
+      "condition": "de_minimis_computed == true and de_minimis_ratio >= 0.05",
+      "risk_points": 15,
+      "action": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "The calculated ratio of U.S.-origin controlled content to total foreign-product value is 5% or higher. The applicable threshold is a legal determination and requires review of current EAR text and ECCN-specific rules."
+    },
+    {
+      "rule_id": "RF008",
+      "name": "Foreign Production Dependency on U.S. Items",
+      "condition": "fdp_potential == true",
+      "risk_points": 15,
+      "action": "FDP_REVIEW",
+      "explanation": "The foreign-produced item may be produced with U.S.-origin software or technology. Foreign Direct Product rule applicability requires careful legal review."
+    },
+    {
+      "rule_id": "RF009",
+      "name": "Jurisdiction Review Flagged or Incomplete",
+      "condition": "jurisdiction_status == 'JURISDICTION_REVIEW_REQUIRED' or jurisdiction_status == 'INSUFFICIENT_INFORMATION'",
+      "risk_points": 15,
+      "action": "COMPLETE_JURISDICTION_REVIEW",
+      "explanation": "EAR jurisdiction could not be preliminarily assessed from the recorded facts or a formal jurisdiction review was flagged. Do not proceed on the assumption that jurisdiction is resolved."
+    }
+  ]
+}
+

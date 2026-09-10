@@ -1,0 +1,17 @@
+# Normalize line endings for a cross-platform repository.
+* text=auto eol=lf
+
+# Windows launchers keep CRLF so cmd.exe is happy.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# POSIX launchers must stay LF.
+*.sh text eol=lf
+*.command text eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.ico binary
+*.pdf binary
+*.db binary

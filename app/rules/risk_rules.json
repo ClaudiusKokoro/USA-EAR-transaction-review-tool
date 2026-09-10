@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "description": "Risk Engine configuration. Each category has a maximum point value and a set of additive rules. Points never exceed the category maximum. Edit this file to tune scoring; do not hardcode scoring in Python.",
+  "category_scores": {
+    "jurisdiction": { "max": 25 },
+    "product": { "max": 20 },
+    "destination": { "max": 15 },
+    "end_user": { "max": 20 },
+    "end_use": { "max": 10 },
+    "red_flags": { "max": 10 }
+  },
+  "risk_levels": [
+    { "min": 0, "max": 20, "label": "LOW", "color": "#1a7f37" },
+    { "min": 21, "max": 40, "label": "MODERATE", "color": "#9a6700" },
+    { "min": 41, "max": 60, "label": "ELEVATED", "color": "#bc4c00" },
+    { "min": 61, "max": 80, "label": "HIGH", "color": "#cf222e" },
+    { "min": 81, "max": 100, "label": "CRITICAL", "color": "#82071e" }
+  ],
+  "rules": {
+    "jurisdiction": [
+      {
+        "rule_id": "JUR-01",
+        "name": "Jurisdiction assessment incomplete",
+        "condition": "jurisdiction_status == 'INSUFFICIENT_INFORMATION'",
+        "points": 20,
+        "explanation": "Required jurisdiction facts are missing, so jurisdiction cannot yet be preliminarily assessed."
+      },
+      {
+        "rule_id": "JUR-02",
+        "name": "Formal EAR jurisdiction review required",
+        "condition": "jurisdiction_status == 'JURISDICTION_REVIEW_REQUIRED'",
+        "points": 15,
+        "explanation": "The recorded facts indicate that EAR jurisdiction should be formally reviewed before further processing."
+      },
+      {
+        "rule_id": "JUR-03",
+        "name": "U.S.-origin item without recorded ECCN",
+        "condition": "jurisdiction_status == 'POSSIBLE_EAR_JURISDICTION' and is_us_origin == true and has_eccn == false",
+        "points": 7,
+        "explanation": "The item appears to be U.S.-origin and no ECCN or EAR classification is recorded. Classification is needed to support further review."
+      },
+      {
+        "rule_id": "JUR-04",
+        "name": "Potential U.S. nexus from content or production inputs",
+        "condition": "jurisdiction_status == 'POSSIBLE_EAR_JURISDICTION' and (has_us_content == true or us_software_used_in_production == true or us_technology_used_in_production == true)",
+        "points": 8,
+        "explanation": "A U.S.-origin nexus is possible through controlled content or U.S.-origin production inputs; jurisdiction and license requirements cannot be excluded."
+      }
+    ],
+    "product": [
+      {
+        "rule_id": "PRD-01",
+        "name": "Item recorded as controlled under an ECCN",
+        "condition": "existing_ear_status == 'CONTROLLED'",
+        "points": 12,
+        "explanation": "The item is recorded with a controlled ECCN status, increasing the need for detailed export-control review."
+      },
+      {
+        "rule_id": "PRD-02",
+        "name": "Military- or defense-related product terms",
+        "condition": "product_military_terms == true",
+        "points": 16,
+        "explanation": "Military- or defense-related terminology was detected in the product name or description."
+      },
+      {
+        "rule_id": "PRD-03",
+        "name": "No ECCN recorded for item with U.S. nexus",
+        "condition": "has_eccn == false and (is_us_origin == true or has_us_content == true)",
+        "points": 6,
+        "explanation": "No existing ECCN was provided even though the item has a possible U.S. nexus, so product classification remains open."
+      },
+      {
+        "rule_id": "PRD-04",
+        "name": "Product value not recorded",
+        "condition": "product_value_known == false and transaction_value > 0",
+        "points": 3,
+        "explanation": "The product value is missing, limiting valuation-based checks such as de minimis context."
+      }
+    ],
+    "destination": [
+      {
+        "rule_id": "DST-01",
+        "name": "Destination subject to comprehensive U.S. embargo",
+        "condition": "destination_embargoed == true",
+        "points": 15,
+        "explanation": "The ultimate destination is subject to a comprehensive U.S. embargo program and warrants immediate legal review."
+      },
+      {
+        "rule_id": "DST-02",
+        "name": "Destination on special attention list",
+        "condition": "destination_special_attention == true",
+        "points": 8,
+        "explanation": "The destination country is listed in the configuration's special-attention group, which may correlate with heightened license scrutiny."
+      },
+      {
+        "rule_id": "DST-03",
+        "name": "Ultimate destination unknown",
+        "condition": "ultimate_destination == null or strip(str(ultimate_destination)) == ''",
+        "points": 8,
+        "explanation": "The ultimate destination is unknown, so destination-based risk cannot be assessed."
+      }
+    ],
+    "end_user": [
+      {
+        "rule_id": "EUS-01",
+        "name": "Name match requiring manual verification",
+        "condition": "screening_has_manual_verification == true",
+        "points": 20,
+        "explanation": "A party name matches or nearly matches a reference-list entry and manual verification is required."
+      },
+      {
+        "rule_id": "EUS-02",
+        "name": "Possible fuzzy name match",
+        "condition": "screening_has_possible_match == true",
+        "points": 14,
+        "explanation": "A party name is similar to a reference-list entry. Additional identity verification is warranted."
+      },
+      {
+        "rule_id": "EUS-03",
+        "name": "Ultimate end user not identified",
+        "condition": "ultimate_end_user == null or strip(str(ultimate_end_user)) == ''",
+        "points": 12,
+        "explanation": "The ultimate end user has not been identified, so end-user-based risk cannot be assessed."
+      }
+    ],
+    "end_use": [
+      {
+        "rule_id": "EUS-11",
+        "name": "Military-related end-use indicators",
+        "condition": "end_use_military_indicators == true",
+        "points": 8,
+        "explanation": "The declared end use or industry contains military- or defense-related indicators."
+      },
+      {
+        "rule_id": "EUS-12",
+        "name": "Insufficient end-use information",
+        "condition": "end_use_insufficient == true",
+        "points": 6,
+        "explanation": "Declared end-use information is missing or too general to support a preliminary end-use assessment."
+      },
+      {
+        "rule_id": "EUS-13",
+        "name": "Inconsistent business activity",
+        "condition": "end_use_inconsistent_business == true",
+        "points": 6,
+        "explanation": "The declared end use or industry appears inconsistent with other recorded facts."
+      },
+      {
+        "rule_id": "EUS-14",
+        "name": "Unclear installation location",
+        "condition": "end_use_location_unclear == true",
+        "points": 3,
+        "explanation": "The installation location is missing or too vague to support screening or diversion analysis."
+      }
+    ],
+    "red_flags": [
+      {
+        "rule_id": "RFS-01",
+        "name": "Multiple high-severity red flags",
+        "condition": "red_flag_total_points >= 40",
+        "points": 10,
+        "explanation": "The Red Flag Engine identified red flags with a combined point value of 40 or more."
+      },
+      {
+        "rule_id": "RFS-02",
+        "name": "Red flags requiring action",
+        "condition": "red_flag_total_points >= 20 and red_flag_total_points < 40",
+        "points": 8,
+        "explanation": "The Red Flag Engine identified red flags with a combined point value between 20 and 39."
+      },
+      {
+        "rule_id": "RFS-03",
+        "name": "Red flags identified",
+        "condition": "red_flag_count > 0 and red_flag_total_points < 20",
+        "points": 5,
+        "explanation": "At least one red flag was identified, though the combined point value is below 20."
+      }
+    ]
+  }
+}
+

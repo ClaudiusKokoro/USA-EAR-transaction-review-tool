@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "description": "Country and destination metadata used by configurable risk rules. Not a legal determination of any embargo or sanctions program.",
+  "destination_groups": {
+    "US_EMBARGO": {
+      "label": "Countries subject to comprehensive U.S. embargo programs",
+      "codes": ["CU", "IR", "KP", "SY"],
+      "note": "Destinations in this group trigger legal review. Whether a transaction is authorized depends on the applicable program and current regulations."
+    },
+    "SPECIAL_ATTENTION": {
+      "label": "Countries warranting special attention",
+      "codes": ["AF", "BY", "CF", "CN", "HK", "IQ", "LB", "LY", "ML", "MM", "NI", "RU", "SD", "SO", "SS", "UA", "VE", "YE"],
+      "note": "This group reflects heightened regulatory attention, transshipment or diversion concerns, and is configurable."
+    }
+  },
+  "country_notes": {
+    "CN": "China is included in the special-attention group. Chinese-origin foreign-produced items frequently raise U.S. content and Foreign Direct Product questions.",
+    "SG": "Singapore is a common transshipment and distribution hub. Verify the ultimate destination and end user when goods are routed through Singapore.",
+    "HK": "Hong Kong is included in the special-attention group.",
+    "US": "Transactions involving U.S.-origin items may be subject to the EAR.",
+    "RU": "Russia is included in the special-attention group and is subject to extensive sanctions and export-control restrictions.",
+    "BY": "Belarus is included in the special-attention group.",
+    "IR": "Iran is subject to a comprehensive U.S. embargo program.",
+    "KP": "North Korea is subject to a comprehensive U.S. embargo program.",
+    "SY": "Syria is subject to a comprehensive U.S. embargo program.",
+    "CU": "Cuba is subject to a comprehensive U.S. embargo program.",
+    "UA": "Ukraine is included in the special-attention group due to regional conflict-related controls."
+  }
+}
+

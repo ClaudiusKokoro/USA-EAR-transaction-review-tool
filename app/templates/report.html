@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>EAR Transaction Review Report</title>
+  <style>
+    :root {
+      --ink: #1f2328;
+      --muted: #59636e;
+      --line: #d1d9e0;
+      --accent: #0b5394;
+      --soft: #f6f8fa;
+      --warn-bg: #fff8c5;
+      --warn-line: #d4a72c;
+      --low: #1a7f37;
+      --mod: #9a6700;
+      --ele: #bc4c00;
+      --high: #cf222e;
+      --crit: #82071e;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: "Segoe UI", Arial, sans-serif; color: var(--ink); margin: 0; background: #fff; font-size: 14px; line-height: 1.5; }
+    .page { max-width: 900px; margin: 0 auto; padding: 28px 34px 60px; }
+    header.hero { border-bottom: 3px solid var(--accent); padding-bottom: 14px; margin-bottom: 20px; }
+    header.hero h1 { font-size: 26px; margin: 0 0 4px; color: var(--accent); }
+    header.hero .sub { color: var(--muted); }
+    .disclaimer { background: var(--warn-bg); border: 1px solid var(--warn-line); border-left-width: 6px; padding: 12px 16px; margin: 18px 0; border-radius: 6px; }
+    .disclaimer strong { display: block; margin-bottom: 4px; }
+    h2 { font-size: 18px; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 5px; margin: 28px 0 10px; }
+    h3 { font-size: 15px; margin: 16px 0 6px; }
+    p { margin: 6px 0; }
+    .kv { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    .kv td, .kv th, table.data td, table.data th { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+    .kv th { width: 30%; background: var(--soft); font-weight: 600; }
+    table.data { width: 100%; border-collapse: collapse; margin: 8px 0; }
+    table.data th { background: var(--soft); }
+    .status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 12px; }
+    .status.low { background: #dafbe1; color: var(--low); }
+    .status.moderate { background: #fff1c1; color: var(--mod); }
+    .status.elevated { background: #ffe1c6; color: var(--ele); }
+    .status.high { background: #ffd7d5; color: var(--high); }
+    .status.critical { background: #ffc1c1; color: var(--crit); }
+    .flag { background: #fff1c1; border-left: 4px solid var(--warn-line); padding: 8px 12px; margin: 6px 0; border-radius: 3px; }
+    .note { color: var(--muted); font-size: 13px; }
+    ul { margin: 6px 0; padding-left: 22px; }
+    .actions li { margin: 3px 0; }
+    .footer { margin-top: 40px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    @media print { .page { max-width: none; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>EAR Transaction Review Report</h1>
+      <div class="sub">Prepared by EAR Transaction Review Tool &mdash; preliminary, rule-based risk assessment</div>
+      <div class="sub">Generated: $generated_at</div>
+    </header>
+
+    <div class="disclaimer">
+      <strong>Important disclaimer</strong>
+      <p>This tool provides a preliminary compliance risk assessment based on user-provided information and configurable rules. It does not constitute legal advice and does not determine whether an export, reexport, or transfer is authorized under the EAR.</p>
+    </div>
+
+    <h2>Executive Summary</h2>
+    $executive_summary
+
+    $sections_html
+
+    <div class="disclaimer">
+      <strong>Important disclaimer</strong>
+      <p>This tool provides a preliminary compliance risk assessment based on user-provided information and configurable rules. It does not constitute legal advice and does not determine whether an export, reexport, or transfer is authorized under the EAR.</p>
+    </div>
+
+    <div class="footer">
+      EAR Transaction Review Tool &bull; Local-first review &bull; Generated from facts entered into the tool.
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,290 @@
+{
+  "version": 1,
+  "description": "EAR review question interfaces exposed to the DeepSeek frontend. Each question is a standalone interface with a stable ID, prompt templates in Chinese/English, an expected answer type, and the review fact it maps to.",
+  "interfaces": [
+    {
+      "interface_id": "ear.transaction.buyer_party",
+      "category": "Transaction & Parties",
+      "name_zh": "买方与收货方确认",
+      "name_en": "Buyer & Consignee Confirmation",
+      "question_zh": "请确认交易中的买方、收货方（consignee）以及各自所在国家/地区，是否与提单和合同完全一致？",
+      "question_en": "Please confirm the buyer, consignee, and their countries match the contract and bill of lading exactly.",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "buyer_name",
+        "buyer_country",
+        "consignee"
+      ],
+      "related_stage": 1,
+      "prompt_template_zh": "你现在是 EAR 交易初审中的事实采集助手。请不要给出‘交易合法/无需许可/违反EAR’等结论，只提出一个必须由用户确认的事实问题：{question}",
+      "prompt_template_en": "You are a fact-collection assistant for an EAR transaction review. Do not reach legal conclusions. Ask the user only the factual question: {question}",
+      "category_zh": "交易与当事方"
+    },
+    {
+      "interface_id": "ear.transaction.ultimate_end_user",
+      "category": "End User & End Use",
+      "name_zh": "最终用户确认",
+      "name_en": "Ultimate End User Confirmation",
+      "question_zh": "这笔交易的最终用户（ultimate end user）是谁？是否与买方不同？如尚未获得，请说明获取该信息的计划。",
+      "question_en": "Who is the ultimate end user? Is it different from the buyer? If unknown, describe how the information will be obtained.",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "ultimate_end_user"
+      ],
+      "related_stage": 1,
+      "prompt_template_zh": "你现在是 EAR 交易初审中的事实采集助手。请不要给出法律结论。最终用户信息缺失是审核中的已知问题，请向用户提出一个具体、可回答的问题：{question}",
+      "prompt_template_en": "You are a fact-collection assistant for an EAR transaction review. The ultimate end user is missing. Ask the user one concrete question: {question}",
+      "category_zh": "最终用户与用途"
+    },
+    {
+      "interface_id": "ear.transaction.ultimate_destination",
+      "category": "Destination",
+      "name_zh": "最终目的地确认",
+      "name_en": "Ultimate Destination Confirmation",
+      "question_zh": "货物最终运抵的国家/地区是哪里？如经中转，最终目的地与中转地分别是什么？",
+      "question_en": "What is the ultimate destination country? If transshipped, what are the transit point and final destination?",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "ultimate_destination"
+      ],
+      "related_stage": 1,
+      "prompt_template_zh": "你是 EAR 交易初审的事实采集助手，只负责事实，不输出法律结论。请围绕最终目的地提出清晰的问题：{question}",
+      "prompt_template_en": "You are an EAR fact-collection assistant. Ask for the ultimate destination facts without legal conclusions: {question}",
+      "category_zh": "目的地"
+    },
+    {
+      "interface_id": "ear.product.classification",
+      "category": "Product & Classification",
+      "name_zh": "产品名称与描述核验",
+      "name_en": "Product Description Verification",
+      "question_zh": "请提供产品的完整名称、型号、技术参数和用途说明；是否已有 ECCN 或 EAR99 分类结论？",
+      "question_en": "Provide the full product name, model, technical parameters, and use. Has an ECCN or EAR99 classification already been determined?",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "product_name",
+        "model",
+        "product_description",
+        "existing_eccn",
+        "existing_ear_status"
+      ],
+      "related_stage": 2,
+      "prompt_template_zh": "你是 EAR 产品事实采集接口。不要替你判断分类，只收集产品描述、参数和已有分类信息。问题：{question}",
+      "prompt_template_en": "You are the EAR product fact-collection interface. Collect classification facts only; do not classify. Question: {question}",
+      "category_zh": "产品与分类"
+    },
+    {
+      "interface_id": "ear.product.manufacture",
+      "category": "Product & Classification",
+      "name_zh": "生产地与制造方",
+      "name_en": "Manufacturer and Origin",
+      "question_zh": "产品的制造方是谁？生产国家和装配地点在哪里？",
+      "question_en": "Who manufactures the product, and in which country/location is it produced or assembled?",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "manufacturer",
+        "country_of_manufacture"
+      ],
+      "related_stage": 2,
+      "prompt_template_zh": "你是 EAR 产品事实采集接口。请仅收集制造方与生产地事实。问题：{question}",
+      "prompt_template_en": "You are the EAR product fact interface. Collect manufacturer and production location facts only. Question: {question}",
+      "category_zh": "产品与分类"
+    },
+    {
+      "interface_id": "ear.jurisdiction.us_origin",
+      "category": "EAR Jurisdiction",
+      "name_zh": "美国原产判断",
+      "name_en": "U.S.-Origin Question",
+      "question_zh": "该商品是否为美国原产（U.S.-origin）？判断依据（报关单、原产地证明等）是什么？",
+      "question_en": "Is the item U.S.-origin, and what document supports that determination?",
+      "expected_answer_type": "choice",
+      "options": [
+        "Yes",
+        "No",
+        "Unknown"
+      ],
+      "maps_to": [
+        "is_us_origin"
+      ],
+      "related_stage": 3,
+      "prompt_template_zh": "你是 EAR 管辖权步骤的事实接口。输出只能帮助确认事实，不得说‘属EAR管辖/不属EAR管辖’。请提出：{question}",
+      "prompt_template_en": "You are the EAR jurisdiction fact interface. Ask {question} without stating whether the EAR applies.",
+      "category_zh": "EAR 管辖权"
+    },
+    {
+      "interface_id": "ear.jurisdiction.us_content",
+      "category": "EAR Jurisdiction",
+      "name_zh": "美国成分判断",
+      "name_en": "U.S.-Origin Content Question",
+      "question_zh": "该外国生产商品中是否含有美国原产部件、材料或软件内容？如有，请列出具体部件。",
+      "question_en": "Does the foreign-made item contain U.S.-origin parts, materials, or software content? If so, list them.",
+      "expected_answer_type": "choice",
+      "options": [
+        "Yes",
+        "No",
+        "Unknown"
+      ],
+      "maps_to": [
+        "has_us_origin_content"
+      ],
+      "related_stage": 3,
+      "prompt_template_zh": "你是 EAR 管辖权事实接口。围绕‘是否含美国原产内容’提问，不给出结论：{question}",
+      "prompt_template_en": "You are the EAR jurisdiction fact interface. Ask about U.S.-origin content without conclusions: {question}",
+      "category_zh": "EAR 管辖权"
+    },
+    {
+      "interface_id": "ear.jurisdiction.us_content_values",
+      "category": "EAR Jurisdiction / De Minimis",
+      "name_zh": "美国成分价值",
+      "name_en": "U.S. Content Values",
+      "question_zh": "美国原产受控成分的总价值是否已知？外国生产商品的总价值是多少？请按组件分别填写价值。",
+      "question_en": "Is the total value of U.S.-origin controlled content known? What is the total value of the foreign item?",
+      "expected_answer_type": "table",
+      "options": [],
+      "maps_to": [
+        "us_content_value_known",
+        "total_foreign_value_known"
+      ],
+      "related_stage": 4,
+      "prompt_template_zh": "你是 de minimis 计算的事实接口。只收集金额事实；不要告诉用户阈值是多少或是否超过阈值。问题：{question}",
+      "prompt_template_en": "You are the de minimis fact interface. Collect value facts only; never state whether a threshold is exceeded. Question: {question}",
+      "category_zh": "EAR 管辖权 / 最低含量"
+    },
+    {
+      "interface_id": "ear.jurisdiction.production_inputs",
+      "category": "EAR Jurisdiction / FDP",
+      "name_zh": "生产环节中的美国软件与技术",
+      "name_en": "U.S. Production Inputs",
+      "question_zh": "该外国商品的生产过程是否使用了美国原产软件或技术？请说明名称、版本和使用环节。",
+      "question_en": "Does the production process use U.S.-origin software or technology? Provide name, version, and role.",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "us_software_used_in_production",
+        "us_technology_used_in_production"
+      ],
+      "related_stage": 5,
+      "prompt_template_zh": "你是 FDP 审查的事实接口。只收集美国软件/技术使用事实，不判断是否触发 Foreign Direct Product 规则。问题：{question}",
+      "prompt_template_en": "You are the FDP review fact interface. Collect U.S. software/technology usage facts; do not decide whether FDP rules apply. Question: {question}",
+      "category_zh": "EAR 管辖权 / FDP"
+    },
+    {
+      "interface_id": "ear.jurisdiction.production_chain",
+      "category": "EAR Jurisdiction / FDP",
+      "name_zh": "生产链条完整度",
+      "name_en": "Production Chain Completeness",
+      "question_zh": "能否完整描述生产链条：生产设施、所用设备、工艺流程？哪一部分尚无法确认？",
+      "question_en": "Can you describe the full production chain: facilities, equipment, and process? Which parts remain unconfirmed?",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "production_chain_known",
+        "foreign_production_facilities"
+      ],
+      "related_stage": 5,
+      "prompt_template_zh": "你是生产链条事实接口。请提出具体问题收集生产设施、设备与工艺事实：{question}",
+      "prompt_template_en": "You are the production-chain fact interface. Ask for facilities, equipment, and process facts: {question}",
+      "category_zh": "EAR 管辖权 / FDP"
+    },
+    {
+      "interface_id": "ear.party.related_entities",
+      "category": "Restricted Party Screening",
+      "name_zh": "关联实体筛查补充",
+      "name_en": "Related Entities for Screening",
+      "question_zh": "除买方、收货方、最终用户外，是否还有母公司、子公司、董事或受益所有人需要列入筛查？",
+      "question_en": "Besides buyer, consignee, and end user, are there parent companies, subsidiaries, directors, or beneficial owners to screen?",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "parent_companies",
+        "subsidiaries",
+        "directors",
+        "beneficial_owners"
+      ],
+      "related_stage": 6,
+      "prompt_template_zh": "你是当事方筛查事实接口。只收集需筛查的实体名单和身份信息，不判断是否命中受限名单。问题：{question}",
+      "prompt_template_en": "You are the party screening fact interface. Collect entity names for screening; do not conclude whether a party is restricted. Question: {question}",
+      "category_zh": "受管制方筛查"
+    },
+    {
+      "interface_id": "ear.end_use.purpose",
+      "category": "End Use",
+      "name_zh": "最终用途说明",
+      "name_en": "Declared End Use",
+      "question_zh": "最终用户将如何使用该商品？请区分民用、军用、航空航天、半导体、科研或其他用途，并说明使用场景。",
+      "question_en": "How will the end user use the item? Indicate civil, military, aerospace, semiconductor, research, or other use.",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "declared_end_use",
+        "civil_use",
+        "military_use",
+        "aerospace_use"
+      ],
+      "related_stage": 7,
+      "prompt_template_zh": "你是最终用途事实接口。请提出一个问题来收集实际用途和用途类别；注意不得据此判定交易合法或违法。问题：{question}",
+      "prompt_template_en": "You are the end-use fact interface. Ask about actual use categories without legal conclusions: {question}",
+      "category_zh": "最终用途"
+    },
+    {
+      "interface_id": "ear.end_use.installation",
+      "category": "End Use",
+      "name_zh": "安装/交付地点",
+      "name_en": "Installation Location",
+      "question_zh": "商品最终安装、使用或交付的具体地址在哪里？（请提供城市和国家，避免只写‘仓库’或‘物流中心’）",
+      "question_en": "Where will the item be installed, used, or delivered? Provide a city and country, not just 'warehouse'.",
+      "expected_answer_type": "text",
+      "options": [],
+      "maps_to": [
+        "installation_location"
+      ],
+      "related_stage": 7,
+      "prompt_template_zh": "你是最终用途事实接口。请针对安装/交付地点提出具体事实问题：{question}",
+      "prompt_template_en": "You are the end-use fact interface. Ask for a concrete installation/delivery location: {question}",
+      "category_zh": "最终用途"
+    },
+    {
+      "interface_id": "ear.destination.embargo",
+      "category": "Destination",
+      "name_zh": "禁运与特殊目的地确认",
+      "name_en": "Embargo / Special Destination Check",
+      "question_zh": "最终目的地是否可能属于全面禁运或特殊关注国家/地区？是否曾有转运或变更目的地计划？",
+      "question_en": "Could the final destination be an embargoed or special-attention country? Are there any transshipment or rerouting plans?",
+      "expected_answer_type": "choice",
+      "options": [
+        "None",
+        "Possible embargo country",
+        "Planned transshipment",
+        "Unknown"
+      ],
+      "maps_to": [
+        "ultimate_destination"
+      ],
+      "related_stage": 7,
+      "prompt_template_zh": "你是目的地事实接口。请收集目的地和转运事实；不要把某国是否被禁运当作法律结论输出，而应引导用户核验。问题：{question}",
+      "prompt_template_en": "You are the destination fact interface. Collect destination and transshipment facts; do not issue legal conclusions. Question: {question}",
+      "category_zh": "目的地"
+    },
+    {
+      "interface_id": "ear.evidence.documents",
+      "category": "Documents & Evidence",
+      "name_zh": "支持文件清单",
+      "name_en": "Supporting Documents",
+      "question_zh": "可以上传哪些支持文件？例如：采购订单、商业发票、原产地证明、技术规格书、最终用户声明、提单等。",
+      "question_en": "Which supporting documents can be uploaded (PO, invoice, certificate of origin, technical spec, end-user statement, bill of lading)?",
+      "expected_answer_type": "file",
+      "options": [],
+      "maps_to": [
+        "uploaded_files"
+      ],
+      "related_stage": 11,
+      "prompt_template_zh": "你是 EAR 审核的证据收集接口。请向用户提出所需文件清单问题，便于后续上传并交由 DeepSeek 分析：{question}",
+      "prompt_template_en": "You are the EAR evidence-collection interface. Ask which documents should be uploaded for analysis: {question}",
+      "category_zh": "文件证据"
+    }
+  ]
+}

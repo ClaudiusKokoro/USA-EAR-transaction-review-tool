@@ -1,0 +1,13 @@
+# SAMPLE REFERENCE LIST - FOR DEMONSTRATION ONLY
+# This file does NOT contain an official U.S. restricted party or sanctions list.
+# Replace it with a current official list before using the tool for production reviews.
+name,aliases,country,reference,source,notes
+Northstar Dynamic Systems Ltd.,Northstar Dynamics;NDS Limited,GB,SAMPLE-0001,SAMPLE,Non-existent demonstration entity
+Aurora Global Trading FZE,Aurora Global;Aurora FZE,AE,SAMPLE-0002,SAMPLE,Non-existent demonstration entity
+Pacific Meridian Industries LLC,PMI;Pacific Meridian,US,SAMPLE-0003,SAMPLE,Non-existent demonstration entity
+Meridian Pacific Trading Co.,Meridian Pacific;MPT,CN,SAMPLE-0004,SAMPLE,Non-existent demonstration entity
+Blue Horizon Defense Group,Blue Horizon;BH Defense,KP,SAMPLE-0005,SAMPLE,Non-existent demonstration entity
+Silk Road Freight Forwarding Ltd.,Silk Road FF;SRFF,SG,SAMPLE-0006,SAMPLE,Non-existent demonstration entity
+Vector Semiconductor Technology Inc.,Vector Semi;VSTI,TW,SAMPLE-0007,SAMPLE,Non-existent demonstration entity
+Golden Lotus Electronics Company,Golden Lotus;GLEC,CN,SAMPLE-0008,SAMPLE,Non-existent demonstration entity
+
