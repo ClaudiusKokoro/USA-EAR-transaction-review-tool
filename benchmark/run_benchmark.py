@@ -164,6 +164,9 @@ def run_case(case: dict, screening_csv: Path) -> dict:
         "deminimis_status": deminimis.status,
         "deminimis_ratio": float(deminimis.ratio) if deminimis.ratio is not None else None,
         "deminimis_included_value": float(deminimis.controlled_us_content_value or 0),
+        "deminimis_warnings": [str(warning) for warning in deminimis.warnings],
+        "deminimis_notes": [str(note) for note in deminimis.notes],
+        "deminimis_excluded": [str(item) for item in deminimis.excluded_components],
         "fdp_flag": fdp.flag,
         "screening": {result.party.name: result.status for result in screening_output.results},
         "screening_scores": {
@@ -233,6 +236,24 @@ def evaluate(case: dict, actual: dict) -> list[dict]:
             "end_use_flags",
             actual["end_use_flags"] == expected_flags,
             f"expected {expected_flags}, got {actual['end_use_flags']}",
+        )
+
+    for fragment in expected.get("warnings_should_include", []):
+        haystack = " ".join(
+            actual.get("deminimis_warnings", []) + actual.get("deminimis_notes", [])
+        ).casefold()
+        check(
+            f"warning_present:{fragment}",
+            fragment.casefold() in haystack,
+            f"warning '{fragment}' missing from {actual.get('deminimis_warnings')}",
+        )
+
+    for category, minimum in (expected.get("risk_category_points_min") or {}).items():
+        actual_points = actual.get("risk_categories", {}).get(category)
+        check(
+            f"risk_category_min:{category}",
+            actual_points is not None and actual_points >= float(minimum),
+            f"expected at least {minimum} points in '{category}', got {actual_points}",
         )
 
     for rule_id in expected.get("red_flags_should_include", []):

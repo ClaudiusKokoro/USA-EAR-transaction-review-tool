@@ -73,7 +73,30 @@
       "risk_points": 15,
       "action": "COMPLETE_JURISDICTION_REVIEW",
       "explanation": "EAR jurisdiction could not be preliminarily assessed from the recorded facts or a formal jurisdiction review was flagged. Do not proceed on the assumption that jurisdiction is resolved."
+    },
+    {
+      "rule_id": "RF010",
+      "name": "De Minimis Calculation Incomplete",
+      "condition": "jurisdiction_path == 'FOREIGN_US_CONTENT' and de_minimis_computed == false",
+      "risk_points": 12,
+      "action": "OBTAIN_DE_MINIMIS_FACTS",
+      "explanation": "The item is foreign-produced with recorded U.S.-origin content, but the de minimis ratio could not be calculated. Collect the value of the controlled U.S.-origin content and the total value of the foreign-produced item before closing the review."
+    },
+    {
+      "rule_id": "RF011",
+      "name": "Encryption Capability Without a Recorded Classification",
+      "condition": "encryption_without_classification == true",
+      "risk_points": 10,
+      "action": "COMPLETE_CLASSIFICATION",
+      "explanation": "The product description refers to encryption or cryptography but no ECCN is recorded. Encryption items are frequently controlled, for example under ECCN 5A002 or 5D002, so the classification should be confirmed."
+    },
+    {
+      "rule_id": "RF012",
+      "name": "Buyer Located in a Comprehensively Embargoed Country",
+      "condition": "buyer_country_embargoed == true",
+      "risk_points": 20,
+      "action": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "The buyer is located in a country subject to a comprehensive U.S. embargo program. Review the transaction even when the recorded ultimate destination is elsewhere, because of diversion risk."
     }
   ]
 }
-

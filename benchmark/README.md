@@ -31,27 +31,28 @@ into CI. Use `--allow-failures` for exploratory runs.
 
 ## What is covered
 
-95 cases across eleven families:
+99 cases across eleven families:
 
 | Family | Cases | What it probes |
 | --- | --- | --- |
 | `jurisdiction` | 10 | U.S.-origin, foreign content, production inputs, unanswered questions |
 | `deminimis` | 10 | missing inputs, excluded components, the 5% threshold boundary, high ratios |
+| `deminimis_advanced` | 12 | mixed component sets, recurring decimals, ratio above 100%, 10% and 25% boundaries, zero-value and production-only components |
 | `fdp` | 6 | U.S. software/technology with and without production-chain facts |
 | `screening` | 11 | exact name, alias, near-miss, British spelling, parent/owner/consignee/exporter roles |
 | `end_use` | 8 | military indicators, incomplete descriptions, civil/military contradictions, vague locations |
 | `destination` | 6 | comprehensive embargo, special attention, missing destination, buyer-vs-destination mismatch |
+| `software` | 17 | licensing, encryption (5D002 and unclassified), SDKs in foreign products, production-only software, digital delivery, keyword traps |
 | `mixed` | 7 | stacked severity, including a case that reaches CRITICAL 95/100 |
 | `clean_control` | 6 | transactions that must **not** be flagged (false-positive control) |
 | `boundary` | 6 | keyword traps, missing values, all-questions-unanswered, exact list name |
-| `software` | 15 | licensing, encryption (5D002), SDKs in foreign products, production-only software, digital delivery, keyword traps |
-| `deminimis_advanced` | 10 | mixed component sets, recurring decimals, ratio above 100%, 10% and 25% boundaries, zero-value components |
 
 ## Two layers of checking
 
 1. **Expectation checks** - each case records what the rules should produce
-   (jurisdiction state, de minimis status and ratio, FDP flag, per-party
-   screening status, end-use flags, red flag IDs, risk band, queue decision).
+   (jurisdiction state, de minimis status and ratio, output warnings, FDP flag,
+   per-party screening status, end-use flags, red flag IDs, risk band, category
+   points, queue decision).
 2. **Guardrail checks** - applied to every case:
    - screening status is always one of the three defined values;
    - no output ever labels a party as restricted;
@@ -75,64 +76,60 @@ into CI. Use `--allow-failures` for exploratory runs.
 Latest run on the shipped rules:
 
 ```
-cases: 95 | fully passing: 95 | checks: 577/577
+cases: 99 | fully passing: 99 | checks: 617/617
 ```
 
-Risk levels spanned LOW, MODERATE, ELEVATED, HIGH and CRITICAL; all four queue
-decisions were exercised. See `results/summary.md` after a run for the full
+Risk levels span LOW, MODERATE, ELEVATED, HIGH and CRITICAL; all four queue
+decisions are exercised. See `results/summary.md` after a run for the full
 breakdown.
 
-## Known calibration findings
+## Issues found by the benchmark and fixed
 
-The benchmark surfaced the following behaviours, all reproducible from the
-`software` and `deminimis_advanced` families. They are recorded in the dataset
-metadata and repeated in `results/summary.md`.
+The first version of this dataset exposed eight calibration problems. All of
+them are now fixed in the shipped rules and services, and each fix is locked in
+by one or more cases.
 
-**Score model**
+| # | Problem found | Fix | Cases |
+| --- | --- | --- | --- |
+| 1 | The de minimis ratio had no effect on the score: 6.7%, 60% and 160% all returned LOW 19/100. | Graded rules `JUR-05` (5-10%), `JUR-06` (10-25%) and `JUR-07` (>= 25%) score the magnitude. | DM-07, SW-11, DMX-11, SW-12, DMX-04 |
+| 2 | An incomplete de minimis calculation raised no red flag and could reach `AUTO_REVIEW_COMPLETE`. | New red flag `RF010` plus risk rule `JUR-08`; the review now routes to compliance. | SW-10, DMX-01, DM-01 |
+| 3 | A controlled U.S. component entered with value `0` was silently read as "no controlled U.S. content". | The component is excluded with a warning naming it. | DMX-09 |
+| 4 | A numerator larger than the declared total produced a 160% ratio with no warning. | The calculator now warns that the U.S. content value exceeds the total value. | DMX-04 |
+| 5 | Red flag `action` values were never read by the queue, so RF007's `LEGAL_REVIEW_REQUIRED` routed to compliance instead. | New queue rule `RQ-07` reads `red_flag_requires_legal`. | DM-10, SW-11, DMX-11 |
+| 6 | The red-flag category was capped at 10 points, so an embargoed destination scored only MODERATE. | The cap was raised to 15 and `RFS-01/02` rebalanced; an embargoed destination now reaches ELEVATED. | DST-01, MIX-05 |
+| 7 | The embargo check read `ultimate_destination` only, so a buyer in an embargoed country was invisible. | New red flag `RF012` and risk rule `DST-04` cover the buyer's country. | DST-06, DST-01 |
+| 8 | Software handling was keyword-only: "guidance" and "targeting" caused false positives, while encryption was invisible. | Weak military terms now need a strong term in the same text; a shared `encryption_without_classification` fact drives `RF011` and `PRD-05`, with negation handling. | SW-08, SW-14, SW-16, CLN-02 |
 
-1. **The size of the de minimis ratio is never scored.** RF007 is a boolean
-   `>= 5%` test and the red-flag category is capped at 10 points, so ratios of
-   6.7%, 19%, 60% and even 160% all return the same **LOW 19/100** result
-   (`SW-11`, `SW-12`, `DMX-02`, `DMX-04`).
-2. **An incomplete de minimis calculation raises no red flag.** A controlled U.S.
-   component with no recorded value (`MISSING_VALUE`) still reaches
-   `AUTO_REVIEW_COMPLETE` with LOW risk (`SW-10`, `DMX-01`).
-3. **The red-flag category is capped at 10 points**, so an embargoed destination
-   or a high de minimis ratio cannot lift the band on its own; routing still
-   escalates because the queue rules read the underlying facts.
-4. **Red flag `action` values are never read by the queue rules.** RF007 declares
-   `LEGAL_REVIEW_REQUIRED`, but a case carrying only that flag routes to
-   `COMPLIANCE_REVIEW_REQUIRED` through RQ-07.
+One further change came out of case `SW-04`: component rows can now be marked
+**incorporated into the item** or **used in production only**. Production-only
+rows are excluded from the de minimis numerator (they belong to the FDP step),
+and rows with no record produce a note asking the reviewer to confirm.
 
-**De minimis inputs**
+## Remaining limitations
 
-5. **Silent value edge cases:** a controlled U.S. component entered with a value
-   of `0` is read as "no controlled U.S. content" (`DMX-09`), and a numerator
-   larger than the declared total produces a 160% ratio with no validation
-   warning (`DMX-04`).
-6. **Production-only software inflates the numerator.** A toolchain licence used
-   during production can be entered as an incorporated component, triggering
-   RF007 on what is really an FDP question (`SW-04`).
-
-**Software handling**
-
-7. **Keyword-only detection.** Civilian software copy containing "guidance"
-   (`SW-08`) or "targeting" (`SW-14`) raises RF004 and a military end-use flag,
-   while encryption software is only noticed through a recorded `5D002` - the
-   word "encryption" is not modelled (`SW-02`).
-
-**Destination**
-
-8. **The embargo check uses `ultimate_destination` only.** A buyer located in an
-   embargoed country whose ultimate destination is elsewhere does not trigger
-   RF003 (`DST-06`).
+1. **Keyword-based military detection.** Weak terms need a strong term nearby,
+   but strong terms such as "military-grade" in marketing copy still raise a
+   review flag. That is deliberate - the tool flags for human review rather than
+   deciding.
+2. **Keyword-based encryption detection.** Only the negations "no encryption",
+   "without encryption", "non-encrypted" and "not encrypted" are recognised;
+   another negative phrasing may still be flagged.
+3. **No electronic-delivery concept.** A software download is recorded exactly
+   like a physical shipment, so no consignee or shipment date is required
+   (SW-15).
+4. **A ratio above 100% is reported, not rejected.** The reviewer still has to
+   correct the inputs (DMX-04).
+5. **De minimis grading saturates at 12%** because the jurisdiction category is
+   capped at 20 points; the queue escalation is the primary signal for very high
+   ratios.
 
 ## Adding cases
 
 1. Add a `case(...)` entry in `make_cases.py` under the relevant family.
 2. State only what the case varies; the baseline is a complete, clean
    transaction.
-3. Set expectations from the rule files, and use
-   `red_flags_should_include` / `red_flags_should_not_include` when only part of
-   the rule set is relevant.
+3. Set expectations from the rule files. Use `red_flags_should_include` /
+   `red_flags_should_not_include` when only part of the rule set is relevant,
+   and `warnings_should_include` or `risk_category_points_min` for finer
+   assertions.
 4. Run `python benchmark/make_cases.py && python benchmark/run_benchmark.py`.

@@ -12,10 +12,13 @@ from app.models.review import (
     EndUseReviewResult,
 )
 
-MILITARY_TERMS = {
+# Terms that are strong enough to indicate a military or defense context on their own.
+STRONG_MILITARY_TERMS = {
     "military",
+    "military-grade",
     "defense",
     "defence",
+    "defense-grade",
     "weapon",
     "weapons",
     "armament",
@@ -23,27 +26,52 @@ MILITARY_TERMS = {
     "ammunition",
     "missile",
     "missiles",
-    "guidance",
-    "drone",
-    "uav",
+    "warhead",
     "combat",
     "firearm",
     "rifle",
-    "warhead",
-    "naval",
-    "warship",
-    "radar",
-    "targeting",
-    "night vision",
-    "camouflage",
-    "ballistic",
-    "rocket",
+    "artillery",
     "torpedo",
+    "ballistic",
     "armored",
     "armoured",
-    "military-grade",
-    "defense-grade",
+    "warship",
+    "night vision",
 }
+
+# Words that are commonly used in civilian software and consumer products. They are
+# only treated as military indicators when a strong term appears in the same text
+# (for example "audience targeting" versus "missile targeting").
+WEAK_MILITARY_TERMS = {
+    "guidance",
+    "targeting",
+    "radar",
+    "drone",
+    "uav",
+    "rocket",
+    "naval",
+    "camouflage",
+}
+
+# Backwards-compatible union of every term, for callers that only need the vocabulary.
+MILITARY_TERMS = STRONG_MILITARY_TERMS | WEAK_MILITARY_TERMS
+
+
+def military_terms_found(text: str | None) -> list[str]:
+    """Return the military terms in ``text``, ignoring weak terms without context."""
+
+    lowered = " ".join(str(text or "").split()).casefold()
+    if not lowered:
+        return []
+    strong_hits = sorted(term for term in STRONG_MILITARY_TERMS if term in lowered)
+    if not strong_hits:
+        return []
+    weak_hits = sorted(term for term in WEAK_MILITARY_TERMS if term in lowered)
+    return strong_hits + weak_hits
+
+
+def contains_military_indicators(text: str | None) -> bool:
+    return bool(military_terms_found(text))
 
 VAGUE_LOCATION_TERMS = {"unknown", "n/a", "na", "tbd", "to be determined", "various", "anywhere", "not sure"}
 INDUSTRY_KEYS = {
@@ -77,7 +105,7 @@ def run_end_use_review(value: EndUseReviewInput | dict) -> EndUseReviewResult:
     location = _clean(review_input.installation_location)
     industry = _clean(review_input.industry)
 
-    military_text_hits = [term for term in MILITARY_TERMS if term in declared or term in industry]
+    military_text_hits = military_terms_found(" ".join(part for part in (declared, industry) if part))
     military_selected = review_input.military_use or review_input.aerospace_use
 
     # 1. Insufficient end-use information.
@@ -153,4 +181,3 @@ def run_end_use_review(value: EndUseReviewInput | dict) -> EndUseReviewResult:
     else:
         summary = "No end-use flags were raised by the recorded facts and rules."
     return EndUseReviewResult(input=review_input, flags=flags, summary=summary)
-

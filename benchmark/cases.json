@@ -2,18 +2,14 @@
   "metadata": {
     "dataset_name": "ear_benchmark_v1",
     "version": 1,
-    "case_count": 95,
+    "case_count": 99,
     "screening_list": "benchmark/screening_list.csv",
     "notes": "Hand-authored benchmark for the EAR Transaction Review Tool. All entities are fictitious. Expectations are derived from app/rules/*.json and app/data/country_data.json.",
     "known_issues": [
-      "The size of the de minimis ratio is never scored. RF007 is a boolean test (>= 5%) and the red-flag category is capped at 10 points, so ratios of 6.7%, 19%, 60% and even 160% all return the same LOW 19/100 result (cases SW-11, SW-12, DMX-02, DMX-04).",
-      "An incomplete de minimis calculation raises no red flag of its own. When a controlled U.S. component has no recorded value (MISSING_VALUE) the case still reaches AUTO_REVIEW_COMPLETE with LOW risk (cases SW-10 and DMX-01).",
-      "Value edge cases are accepted silently: a controlled U.S. component entered with a value of 0 is read as 'no controlled U.S. content' (DMX-09), and a numerator larger than the declared total produces a 160% ratio with no validation warning (DMX-04).",
-      "The red-flag category is capped at 10 points, so severe red flags (an embargoed destination, a high de minimis ratio) cannot lift the score band on their own. Routing still escalates because the queue rules read the underlying facts.",
-      "Red flag findings carry an action field (for example LEGAL_REVIEW_REQUIRED) that the review queue rules never read; routing uses score bands and derived booleans only.",
-      "The destination embargo check (RF003 / DST-01) reads ultimate_destination only, so a buyer in an embargoed country with an ultimate destination elsewhere does not trigger the embargo flag. Case DST-06 documents this behaviour.",
-      "Software handling is keyword-only. Civilian software copy containing 'guidance' (SW-08) or 'targeting' (SW-14) raises RF004 and a military end-use flag, while encryption software is only noticed through a recorded 5D002 - the word 'encryption' is not modelled (SW-02).",
-      "The de minimis step accepts a component row for software that was used in production rather than incorporated into the item, which can inflate the numerator and trigger RF007 on what is really an FDP question (SW-04)."
+      "Military and defense detection is still keyword-based. Weak terms (guidance, targeting, radar, drone, uav, rocket, naval, camouflage) need a strong term in the same text, but strong terms such as 'military-grade' in marketing copy will still raise a review flag.",
+      "Encryption detection is keyword-based and only recognises negations written as 'no encryption', 'without encryption', 'non-encrypted' or 'not encrypted'. A description that mentions encryption in another negative form may still be flagged.",
+      "The transaction model has no concept of electronic delivery, so a software download is recorded exactly like a physical shipment (SW-15). No consignee or shipment date is required.",
+      "The de minimis ratio above 100% is reported with a warning rather than rejected; a reviewer still has to correct the inputs (DMX-04)."
     ]
   },
   "cases": [
@@ -108,6 +104,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Baseline control: complete facts, no U.S. content questions, no red flags expected."
     },
     {
@@ -198,6 +195,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -288,6 +286,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -378,6 +377,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Controlled classification is recorded, so no 'missing ECCN' points should be added."
     },
     {
@@ -468,6 +468,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -571,6 +572,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "False-positive probe: none of these names should be near any benchmark list entry."
     },
     {
@@ -648,6 +650,7 @@
         "red_flags_should_include": []
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -724,6 +727,7 @@
         "jurisdiction_status": "POSSIBLE_EAR_JURISDICTION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -803,6 +807,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -879,6 +884,7 @@
         "jurisdiction_status": "JURISDICTION_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -955,6 +961,7 @@
         "jurisdiction_status": "POSSIBLE_EAR_JURISDICTION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1031,6 +1038,7 @@
         "jurisdiction_status": "INSUFFICIENT_INFORMATION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1107,6 +1115,7 @@
         "jurisdiction_status": "INSUFFICIENT_INFORMATION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1183,6 +1192,7 @@
         "jurisdiction_status": "INSUFFICIENT_INFORMATION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1259,6 +1269,7 @@
         "jurisdiction_status": "JURISDICTION_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1335,6 +1346,7 @@
         "jurisdiction_status": "POSSIBLE_EAR_JURISDICTION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1411,6 +1423,7 @@
         "deminimis_status": "MISSING_INPUT"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1495,6 +1508,7 @@
         "deminimis_status": "MISSING_TOTAL"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1579,6 +1593,7 @@
         "deminimis_status": "MISSING_TOTAL"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1663,6 +1678,7 @@
         "deminimis_status": "MISSING_VALUE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1755,6 +1771,7 @@
         "deminimis_ratio": 0.0
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1840,6 +1857,7 @@
         "deminimis_ratio": 0.0
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -1928,6 +1946,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2016,6 +2035,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2101,6 +2121,7 @@
         "deminimis_ratio": 0.0
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Unclear status must be excluded from the numerator and produce a warning."
     },
     {
@@ -2187,11 +2208,13 @@
         "red_flags_should_include": [
           "RF007"
         ],
-        "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
+        "risk_level_min": "MODERATE",
+        "queue_decision": "LEGAL_REVIEW_REQUIRED"
       },
-      "known_issues": [
-        "A 40% U.S.-content ratio scores only LOW (19/100): the risk engine caps the red-flag category at 10 points, so the size of the ratio does not raise the band.",
-        "Red flag RF007 declares the action LEGAL_REVIEW_REQUIRED, but the review queue rule RQ-07 routes any red flag to COMPLIANCE_REVIEW_REQUIRED instead. The queue never reads the action field of a red flag."
+      "known_issues": [],
+      "resolved_notes": [
+        "De minimis ratios are now scored by magnitude (JUR-05/06/07), so 40% content is no longer in the same band as a 5% ratio.",
+        "The queue now reads red flag actions (RQ-07), so a red flag carrying LEGAL_REVIEW_REQUIRED routes to legal review."
       ],
       "reviewer_notes": ""
     },
@@ -2272,6 +2295,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2348,6 +2372,7 @@
         "fdp_flag": "INSUFFICIENT_INFORMATION"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2427,6 +2452,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2503,6 +2529,7 @@
         "fdp_flag": "NO_FDP_FACTS_IDENTIFIED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2579,6 +2606,7 @@
         "fdp_flag": "POTENTIAL_FDP_ISSUE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2655,6 +2683,7 @@
         "fdp_flag": "POTENTIAL_FDP_ISSUE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2737,6 +2766,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2818,6 +2848,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -2902,6 +2933,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Boundary probe for the fuzzy similarity band between 0.65 and 0.96."
     },
     {
@@ -2980,6 +3012,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3058,6 +3091,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3140,6 +3174,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3223,6 +3258,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3303,6 +3339,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3381,6 +3418,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3461,6 +3499,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3543,6 +3582,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Step 1 parties are screened too, not only the additional parties entered in Step 6."
     },
     {
@@ -3624,6 +3664,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3705,6 +3746,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3786,6 +3828,7 @@
         "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "A one-word declared use with no industry also triggers the 'inconsistent business activity' flag, because the industry field is empty."
     },
     {
@@ -3864,6 +3907,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -3943,6 +3987,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4021,6 +4066,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4100,6 +4146,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4176,6 +4223,7 @@
         "end_use_flags_exact": []
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4255,9 +4303,10 @@
         "risk_level_min": "MODERATE",
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
-      "known_issues": [
-        "An embargoed destination case scores MODERATE (36/100), not HIGH: the destination category caps at 15 points and the red-flag category at 10 points even though the embargo red flag itself carries 25 points.",
-        "The queue outcome is still correct - RQ-03 escalates any embargoed destination to EXTERNAL_COUNSEL_REVIEW_RECOMMENDED regardless of the score band."
+      "known_issues": [],
+      "resolved_notes": [
+        "The red-flag category cap was raised to 15 points, so an embargoed destination now reaches the ELEVATED band instead of MODERATE.",
+        "The buyer's country now also raises RF012 and DST-04, so a buyer in an embargoed country is reported even when the ultimate destination is elsewhere."
       ],
       "reviewer_notes": ""
     },
@@ -4338,6 +4387,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4417,6 +4467,7 @@
         "risk_level_min": "LOW"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4495,6 +4546,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4574,6 +4626,7 @@
         "risk_level_min": "MODERATE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4649,10 +4702,16 @@
       "expected": {
         "red_flags_should_not_include": [
           "RF003"
-        ]
+        ],
+        "red_flags_should_include": [
+          "RF012"
+        ],
+        "queue_decision": "LEGAL_REVIEW_REQUIRED",
+        "risk_level_min": "MODERATE"
       },
       "known_issues": [],
-      "reviewer_notes": "Documented behaviour: the embargo check uses ultimate_destination only. This case records the current behaviour so a reviewer can decide whether it is a gap."
+      "resolved_notes": [],
+      "reviewer_notes": "The destination-based embargo flag (RF003) still uses ultimate_destination only, but the buyer's country is now reported separately through RF012 and DST-04."
     },
     {
       "case_id": "MIX-01",
@@ -4734,6 +4793,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4823,6 +4883,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4900,6 +4961,7 @@
         "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -4978,6 +5040,7 @@
         "queue_decision_min": "LEGAL_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5061,6 +5124,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "RF002 must not fire: the ultimate destination is recorded, only the end user is missing."
     },
     {
@@ -5139,6 +5203,7 @@
         "queue_decision_min": "LEGAL_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5239,6 +5304,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Probes how far the 0-100 score can actually travel when every category is saturated."
     },
     {
@@ -5318,6 +5384,7 @@
         "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Tests the keyword-based military detector against a deliberately ambiguous description."
     },
     {
@@ -5397,6 +5464,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Corporate names are not screened for military terms; only product text and end use are."
     },
     {
@@ -5475,6 +5543,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5553,6 +5622,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5630,6 +5700,7 @@
         "queue_decision_min": "LEGAL_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5708,6 +5779,7 @@
         }
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -5793,6 +5865,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Control case for software: no encryption handling and no U.S. content questions."
     },
     {
@@ -5875,6 +5948,7 @@
         "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "The tool has no encryption-specific logic: a recorded 5D002 drives product risk, and 'encryption' is not treated as a military keyword."
     },
     {
@@ -5965,6 +6039,7 @@
         "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6054,10 +6129,14 @@
           "RF007",
           "RF008"
         ],
+        "warnings_should_include": [
+          "incorporated"
+        ],
         "queue_decision_min": "LEGAL_REVIEW_REQUIRED"
       },
-      "known_issues": [
-        "The de minimis step accepts a component row for software that was only *used in production* rather than incorporated into the item. Here that inflates the ratio to 20% and triggers RF007 even though the case is really an FDP question; the tool never asks the reviewer to distinguish the two."
+      "known_issues": [],
+      "resolved_notes": [
+        "Component rows can now be marked 'incorporated into the item' or 'used in production only'. This case leaves it unrecorded, so the value is still counted but the reviewer is told to confirm it; marking it production-only excludes it (see DMX-12)."
       ],
       "reviewer_notes": ""
     },
@@ -6147,6 +6226,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6235,6 +6315,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "An unclear status must be excluded from the numerator and reported as a warning."
     },
     {
@@ -6315,6 +6396,7 @@
         "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6388,13 +6470,15 @@
         "additional_notes": ""
       },
       "expected": {
-        "red_flags_should_include": [
+        "red_flags_should_not_include": [
           "RF004"
         ],
-        "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
+        "risk_level_exact": "LOW",
+        "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
-      "known_issues": [
-        "'guidance' is on the military keyword list, so a purely civilian warehouse product raises RF004 and a military end-use flag. Flagging for human review is intentional, but it is a false positive worth knowing about."
+      "known_issues": [],
+      "resolved_notes": [
+        "'guidance' is a context-dependent term now: it only counts as a military indicator when a strong term (military, missile, weapon, ...) appears in the same text, so civilian warehouse software is no longer flagged."
       ],
       "reviewer_notes": ""
     },
@@ -6485,6 +6569,7 @@
         "queue_decision_min": "LEGAL_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6567,12 +6652,17 @@
       },
       "expected": {
         "deminimis_status": "MISSING_VALUE",
+        "red_flags_should_include": [
+          "RF010"
+        ],
         "red_flags_should_not_include": [
           "RF007"
-        ]
+        ],
+        "queue_decision": "COMPLIANCE_REVIEW_REQUIRED"
       },
-      "known_issues": [
-        "Missing de minimis data raises no red flag of its own: with the jurisdiction questions otherwise complete this case still reaches AUTO_REVIEW_COMPLETE even though the ratio cannot be calculated."
+      "known_issues": [],
+      "resolved_notes": [
+        "An incomplete de minimis calculation now raises RF010 and scores JUR-08, so the review routes to compliance instead of completing automatically."
       ],
       "reviewer_notes": ""
     },
@@ -6662,6 +6752,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6765,6 +6856,7 @@
         "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -6867,6 +6959,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "'United States', 'USA' and 'U.S.' must all be recognised as U.S.-origin."
     },
     {
@@ -6940,13 +7033,15 @@
         "additional_notes": ""
       },
       "expected": {
-        "red_flags_should_include": [
+        "red_flags_should_not_include": [
           "RF004"
         ],
-        "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
+        "risk_level_exact": "LOW",
+        "queue_decision": "AUTO_REVIEW_COMPLETE"
       },
-      "known_issues": [
-        "'targeting' is on the military keyword list, so commercial advertising software is flagged by RF004. Same keyword-noise pattern as SW-08."
+      "known_issues": [],
+      "resolved_notes": [
+        "'targeting' is now treated as a weak term, so commercial advertising copy no longer raises RF004 unless a strong military term is also present."
       ],
       "reviewer_notes": ""
     },
@@ -7029,7 +7124,180 @@
       "known_issues": [
         "The transaction model has no concept of electronic delivery: a download is captured exactly like a physical shipment, and no consignee or shipment date is required. That is a modelling limitation for software exports."
       ],
+      "resolved_notes": [],
       "reviewer_notes": ""
+    },
+    {
+      "case_id": "SW-16",
+      "title": "Encryption capability described in the product text with no ECCN recorded",
+      "family": "software",
+      "difficulty": "easy",
+      "is_control_case": false,
+      "step1_transaction": {
+        "transaction_name": "TEST-SW-16",
+        "exporter_name": "Northwind Instruments LLC",
+        "exporter_country": "US",
+        "buyer_name": "Rheinland Automation GmbH",
+        "buyer_country": "DE",
+        "consignee": "Rheinland Logistics Hub",
+        "ultimate_end_user": "Bavaria Data Systems GmbH",
+        "ultimate_destination": "DE",
+        "transaction_value": 250000.0,
+        "currency": "USD",
+        "shipment_date": "2026-03-14",
+        "notes": "Fictitious transaction used for benchmark testing."
+      },
+      "step2_product": {
+        "product_name": "Helios Secure Channel",
+        "model": "HDP-4.2",
+        "product_description": "Commercial encryption toolkit providing AES-256 transport encryption and key management for enterprise data pipelines.",
+        "category": "Software",
+        "manufacturer": "Northwind Instruments LLC",
+        "country_of_manufacture": "US",
+        "existing_eccn": null,
+        "existing_ear_status": "Not determined",
+        "product_value": 250000.0
+      },
+      "step3_jurisdiction": {
+        "is_us_origin": true,
+        "has_us_origin_content": null,
+        "us_content_value_known": null,
+        "total_foreign_value_known": null,
+        "us_software_used_in_production": null,
+        "us_technology_used_in_production": null,
+        "production_chain_known": true,
+        "additional_notes": ""
+      },
+      "step4_deminimis": {
+        "components": [],
+        "total_foreign_product_value": null
+      },
+      "step5_fdp": {
+        "us_software_used": "",
+        "us_technology_used": "",
+        "foreign_production_facilities": "",
+        "production_equipment": "",
+        "production_process_description": ""
+      },
+      "step6_parties": {
+        "parent_companies": [],
+        "subsidiaries": [],
+        "directors": [],
+        "beneficial_owners": []
+      },
+      "step7_end_use": {
+        "declared_end_use": "Protecting internal database traffic inside a corporate network",
+        "installation_location": "Munich, Germany",
+        "industry": "Software",
+        "civil_use": true,
+        "military_use": false,
+        "aerospace_use": false,
+        "semiconductor_use": false,
+        "research_use": false,
+        "unknown_use": false,
+        "additional_notes": ""
+      },
+      "expected": {
+        "red_flags_should_include": [
+          "RF011"
+        ],
+        "risk_category_points_min": {
+          "product": 10
+        },
+        "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED"
+      },
+      "known_issues": [],
+      "resolved_notes": [],
+      "reviewer_notes": "Same product as SW-02, but without the 5D002 classification: RF011 asks for classification."
+    },
+    {
+      "case_id": "SW-17",
+      "title": "U.S. software component without an incorporation record",
+      "family": "software",
+      "difficulty": "hard",
+      "is_control_case": false,
+      "step1_transaction": {
+        "transaction_name": "TEST-SW-17",
+        "exporter_name": "Northwind Instruments LLC",
+        "exporter_country": "US",
+        "buyer_name": "Rheinland Automation GmbH",
+        "buyer_country": "DE",
+        "consignee": "Rheinland Logistics Hub",
+        "ultimate_end_user": "Bavaria Data Systems GmbH",
+        "ultimate_destination": "DE",
+        "transaction_value": 250000.0,
+        "currency": "USD",
+        "shipment_date": "2026-03-14",
+        "notes": "Fictitious transaction used for benchmark testing."
+      },
+      "step2_product": {
+        "product_name": "NW-500 Industrial Process Controller",
+        "model": "NW-500-A",
+        "product_description": "Programmable industrial process controller used for temperature and pressure regulation in food-processing plants; assembled in the United States from commercial-grade electronic components.",
+        "category": "Electronics",
+        "manufacturer": "Northwind Instruments LLC",
+        "country_of_manufacture": "US",
+        "existing_eccn": null,
+        "existing_ear_status": "EAR99",
+        "product_value": 250000.0
+      },
+      "step3_jurisdiction": {
+        "is_us_origin": false,
+        "has_us_origin_content": true,
+        "us_content_value_known": true,
+        "total_foreign_value_known": true,
+        "us_software_used_in_production": null,
+        "us_technology_used_in_production": null,
+        "production_chain_known": true,
+        "additional_notes": ""
+      },
+      "step4_deminimis": {
+        "components": [
+          {
+            "component_name": "U.S.-origin analytics SDK licence",
+            "origin": "US",
+            "eccn": null,
+            "controlled_status": "Yes - controlled",
+            "component_value": 180000.0
+          }
+        ],
+        "total_foreign_product_value": 1000000.0
+      },
+      "step5_fdp": {
+        "us_software_used": "",
+        "us_technology_used": "",
+        "foreign_production_facilities": "",
+        "production_equipment": "",
+        "production_process_description": ""
+      },
+      "step6_parties": {
+        "parent_companies": [],
+        "subsidiaries": [],
+        "directors": [],
+        "beneficial_owners": []
+      },
+      "step7_end_use": {
+        "declared_end_use": "Temperature and pressure regulation in a food-processing plant",
+        "installation_location": "Munich, Germany",
+        "industry": "Industrial automation",
+        "civil_use": true,
+        "military_use": false,
+        "aerospace_use": false,
+        "semiconductor_use": false,
+        "research_use": false,
+        "unknown_use": false,
+        "additional_notes": ""
+      },
+      "expected": {
+        "deminimis_status": "COMPUTED",
+        "deminimis_ratio": 0.18,
+        "warnings_should_include": [
+          "incorporated"
+        ]
+      },
+      "known_issues": [],
+      "resolved_notes": [],
+      "reviewer_notes": "When a U.S. component does not record whether it is incorporated or production-only, it is still counted but the reviewer is told to confirm it."
     },
     {
       "case_id": "DMX-01",
@@ -7139,12 +7407,17 @@
       },
       "expected": {
         "deminimis_status": "MISSING_VALUE",
+        "red_flags_should_include": [
+          "RF010"
+        ],
         "red_flags_should_not_include": [
           "RF007"
-        ]
+        ],
+        "queue_decision": "COMPLIANCE_REVIEW_REQUIRED"
       },
-      "known_issues": [
-        "Same gap as SW-10: an incomplete ratio raises no red flag, so a transaction with un-priceable controlled U.S. content can still auto-complete."
+      "known_issues": [],
+      "resolved_notes": [
+        "Same fix as SW-10: the incomplete ratio now raises RF010 and cannot auto-complete."
       ],
       "reviewer_notes": ""
     },
@@ -7262,6 +7535,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Only the two controlled U.S. components count: 190,000 / 1,000,000."
     },
     {
@@ -7347,6 +7621,7 @@
         "deminimis_ratio": 0.3333
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -7429,10 +7704,14 @@
       },
       "expected": {
         "deminimis_status": "COMPUTED",
-        "deminimis_ratio": 1.6
+        "deminimis_ratio": 1.6,
+        "warnings_should_include": [
+          "greater than the total value"
+        ]
       },
-      "known_issues": [
-        "The calculator does not cap the ratio at 100%: U.S. content above the declared total produces 160% and RF007 simply fires. No validation warning flags the internally inconsistent inputs."
+      "known_issues": [],
+      "resolved_notes": [
+        "The ratio is still calculated (160%) but the calculator now warns that the numerator exceeds the total value, so the inconsistent inputs are visible in the report."
       ],
       "reviewer_notes": ""
     },
@@ -7522,6 +7801,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -7610,6 +7890,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": "Every ratio >= 5% is treated identically; the 10% and 25% thresholds are not distinguished."
     },
     {
@@ -7698,6 +7979,7 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -7790,6 +8072,7 @@
         "deminimis_ratio": 0.0
       },
       "known_issues": [],
+      "resolved_notes": [],
       "reviewer_notes": ""
     },
     {
@@ -7872,10 +8155,14 @@
       },
       "expected": {
         "deminimis_status": "NO_CONTROLLED_US_CONTENT",
-        "deminimis_ratio": 0.0
+        "deminimis_ratio": 0.0,
+        "warnings_should_include": [
+          "zero value"
+        ]
       },
-      "known_issues": [
-        "A controlled U.S. component entered with value 0 is treated as 'no controlled U.S. content' rather than as a missing value, so the ratio comes back as 0% instead of asking the reviewer for the real figure."
+      "known_issues": [],
+      "resolved_notes": [
+        "A zero-value controlled U.S. component is now excluded with an explicit warning that names the component, instead of being counted silently as 0%."
       ],
       "reviewer_notes": ""
     },
@@ -7986,6 +8273,200 @@
         ]
       },
       "known_issues": [],
+      "resolved_notes": [],
+      "reviewer_notes": ""
+    },
+    {
+      "case_id": "DMX-11",
+      "title": "Modest U.S. content share is scored above the 5% marker",
+      "family": "deminimis_advanced",
+      "difficulty": "hard",
+      "is_control_case": false,
+      "step1_transaction": {
+        "transaction_name": "TEST-DMX-11",
+        "exporter_name": "Northwind Instruments LLC",
+        "exporter_country": "US",
+        "buyer_name": "Rheinland Automation GmbH",
+        "buyer_country": "DE",
+        "consignee": "Rheinland Logistics Hub",
+        "ultimate_end_user": "Bavaria Data Systems GmbH",
+        "ultimate_destination": "DE",
+        "transaction_value": 250000.0,
+        "currency": "USD",
+        "shipment_date": "2026-03-14",
+        "notes": "Fictitious transaction used for benchmark testing."
+      },
+      "step2_product": {
+        "product_name": "NW-500 Industrial Process Controller",
+        "model": "NW-500-A",
+        "product_description": "Programmable industrial process controller used for temperature and pressure regulation in food-processing plants; assembled in the United States from commercial-grade electronic components.",
+        "category": "Electronics",
+        "manufacturer": "Northwind Instruments LLC",
+        "country_of_manufacture": "US",
+        "existing_eccn": null,
+        "existing_ear_status": "EAR99",
+        "product_value": 250000.0
+      },
+      "step3_jurisdiction": {
+        "is_us_origin": false,
+        "has_us_origin_content": true,
+        "us_content_value_known": true,
+        "total_foreign_value_known": true,
+        "us_software_used_in_production": null,
+        "us_technology_used_in_production": null,
+        "production_chain_known": true,
+        "additional_notes": ""
+      },
+      "step4_deminimis": {
+        "components": [
+          {
+            "component_name": "U.S.-origin controller",
+            "origin": "US",
+            "eccn": null,
+            "controlled_status": "Yes - controlled",
+            "component_value": 70000.0
+          }
+        ],
+        "total_foreign_product_value": 1000000.0
+      },
+      "step5_fdp": {
+        "us_software_used": "",
+        "us_technology_used": "",
+        "foreign_production_facilities": "",
+        "production_equipment": "",
+        "production_process_description": ""
+      },
+      "step6_parties": {
+        "parent_companies": [],
+        "subsidiaries": [],
+        "directors": [],
+        "beneficial_owners": []
+      },
+      "step7_end_use": {
+        "declared_end_use": "Temperature and pressure regulation in a food-processing plant",
+        "installation_location": "Munich, Germany",
+        "industry": "Industrial automation",
+        "civil_use": true,
+        "military_use": false,
+        "aerospace_use": false,
+        "semiconductor_use": false,
+        "research_use": false,
+        "unknown_use": false,
+        "additional_notes": ""
+      },
+      "expected": {
+        "deminimis_status": "COMPUTED",
+        "deminimis_ratio": 0.07,
+        "red_flags_should_include": [
+          "RF007"
+        ],
+        "risk_category_points_min": {
+          "jurisdiction": 12
+        },
+        "risk_level_min": "MODERATE",
+        "queue_decision": "LEGAL_REVIEW_REQUIRED"
+      },
+      "known_issues": [],
+      "resolved_notes": [],
+      "reviewer_notes": "Locks in the graded scoring: 7% content is worth JUR-05 on top of the base U.S.-nexus points."
+    },
+    {
+      "case_id": "DMX-12",
+      "title": "U.S. component recorded as used in production only",
+      "family": "deminimis_advanced",
+      "difficulty": "hard",
+      "is_control_case": false,
+      "step1_transaction": {
+        "transaction_name": "TEST-DMX-12",
+        "exporter_name": "Northwind Instruments LLC",
+        "exporter_country": "US",
+        "buyer_name": "Rheinland Automation GmbH",
+        "buyer_country": "DE",
+        "consignee": "Rheinland Logistics Hub",
+        "ultimate_end_user": "Bavaria Data Systems GmbH",
+        "ultimate_destination": "DE",
+        "transaction_value": 250000.0,
+        "currency": "USD",
+        "shipment_date": "2026-03-14",
+        "notes": "Fictitious transaction used for benchmark testing."
+      },
+      "step2_product": {
+        "product_name": "NW-500 Industrial Process Controller",
+        "model": "NW-500-A",
+        "product_description": "Programmable industrial process controller used for temperature and pressure regulation in food-processing plants; assembled in the United States from commercial-grade electronic components.",
+        "category": "Electronics",
+        "manufacturer": "Northwind Instruments LLC",
+        "country_of_manufacture": "US",
+        "existing_eccn": null,
+        "existing_ear_status": "EAR99",
+        "product_value": 250000.0
+      },
+      "step3_jurisdiction": {
+        "is_us_origin": false,
+        "has_us_origin_content": true,
+        "us_content_value_known": true,
+        "total_foreign_value_known": true,
+        "us_software_used_in_production": null,
+        "us_technology_used_in_production": null,
+        "production_chain_known": true,
+        "additional_notes": ""
+      },
+      "step4_deminimis": {
+        "components": [
+          {
+            "component_name": "U.S.-origin build toolchain licence",
+            "origin": "US",
+            "eccn": null,
+            "controlled_status": "Yes - controlled",
+            "component_value": 200000.0,
+            "incorporated": false
+          },
+          {
+            "component_name": "German housing",
+            "origin": "DE",
+            "eccn": null,
+            "controlled_status": "No - EAR99",
+            "component_value": 60000.0
+          }
+        ],
+        "total_foreign_product_value": 1000000.0
+      },
+      "step5_fdp": {
+        "us_software_used": "",
+        "us_technology_used": "",
+        "foreign_production_facilities": "",
+        "production_equipment": "",
+        "production_process_description": ""
+      },
+      "step6_parties": {
+        "parent_companies": [],
+        "subsidiaries": [],
+        "directors": [],
+        "beneficial_owners": []
+      },
+      "step7_end_use": {
+        "declared_end_use": "Temperature and pressure regulation in a food-processing plant",
+        "installation_location": "Munich, Germany",
+        "industry": "Industrial automation",
+        "civil_use": true,
+        "military_use": false,
+        "aerospace_use": false,
+        "semiconductor_use": false,
+        "research_use": false,
+        "unknown_use": false,
+        "additional_notes": ""
+      },
+      "expected": {
+        "deminimis_status": "NO_CONTROLLED_US_CONTENT",
+        "deminimis_ratio": 0.0,
+        "warnings_should_include": [
+          "production only"
+        ]
+      },
+      "known_issues": [],
+      "resolved_notes": [
+        "A component row can now be marked as used in production only, in which case it is excluded from the de minimis numerator and assessed in the FDP step instead (SW-04)."
+      ],
       "reviewer_notes": ""
     }
   ]

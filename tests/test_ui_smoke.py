@@ -84,6 +84,7 @@ def test_review_workbench_renders_in_english():
 
 
 def test_review_steps_and_list_center_render_in_english():
+    assert "De Minimis Calculator" in assert_english(run_review_page(current_step=4), "step 4")
     assert "Party Screening" in assert_english(run_review_page(current_step=6), "step 6")
     assert "Report Generator" in assert_english(run_review_page(current_step=11), "step 11")
     assert "List & Data Center" in assert_english(

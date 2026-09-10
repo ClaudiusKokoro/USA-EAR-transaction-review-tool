@@ -34,7 +34,7 @@ from app.models.review import (
 from app.models.transaction import TransactionIntake
 from app.paths import rule_path
 from app.rule_evaluator import evaluate_condition
-from app.services.enduse_service import MILITARY_TERMS
+from app.services.enduse_service import contains_military_indicators
 from app.services.json_files import load_json_file
 from app.services.redflag_service import evaluate_red_flag_rules
 
@@ -73,8 +73,7 @@ def _clean_text(value: Any) -> str:
 
 
 def _truthy_military(text: str) -> bool:
-    lowered = text.casefold()
-    return any(term in lowered for term in MILITARY_TERMS)
+    return contains_military_indicators(text)
 
 
 def _ear_status_code(existing_status: str | None, eccn: str | None) -> str:
@@ -97,6 +96,26 @@ def _has_eccn(eccn: str | None) -> bool:
     if not value or value in {"UNKNOWN", "TBD", "N/A", "NA", "NONE", "NO"}:
         return False
     return True
+
+
+ENCRYPTION_TERMS = ("encryption", "cryptograph")
+ENCRYPTION_NEGATIONS = (
+    "no encryption",
+    "without encryption",
+    "non-encrypted",
+    "not encrypted",
+)
+
+
+def _encryption_without_classification(product_description: Any, has_eccn: bool) -> bool:
+    """True when the product text claims encryption capability but no ECCN is recorded."""
+
+    text = " ".join(str(product_description or "").split()).casefold()
+    if not text or has_eccn:
+        return False
+    if not any(term in text for term in ENCRYPTION_TERMS):
+        return False
+    return not any(negation in text for negation in ENCRYPTION_NEGATIONS)
 
 
 def _load_country_data() -> dict[str, Any]:
@@ -182,6 +201,9 @@ def assemble_review_context(
     destination_special = bool(destination_code and destination_code.upper() in groups.get("SPECIAL_ATTENTION", set()))
     if not destination_code and buyer_country:
         destination_special = bool(buyer_country.upper() in groups.get("SPECIAL_ATTENTION", set()))
+    buyer_country_embargoed = bool(
+        buyer_country and buyer_country.upper() in groups.get("US_EMBARGO", set())
+    )
 
     context: dict[str, Any] = {
         # Transaction facts
@@ -215,6 +237,11 @@ def assemble_review_context(
         "product_value": _to_float(field(product_obj, "product_value")),
         "product_value_known": field(product_obj, "product_value") is not None,
         "product_military_terms": _truthy_military(product_text),
+        "encryption_without_classification": _encryption_without_classification(
+            field(product_obj, "product_description"), _has_eccn(field(product_obj, "existing_eccn"))
+            if product_obj is not None
+            else False,
+        ),
         # Jurisdiction question facts
         "is_us_origin": field(questions_obj, "is_us_origin"),
         "has_us_content": field(questions_obj, "has_us_origin_content"),
@@ -243,6 +270,7 @@ def assemble_review_context(
         "destination_country": destination_code,
         "destination_embargoed": destination_embargoed,
         "destination_special_attention": destination_special,
+        "buyer_country_embargoed": buyer_country_embargoed,
         # End-use facts
         "declared_end_use": field(end_use, "input", None).declared_end_use if end_use is not None else None,
         "installation_location": field(end_use, "input", None).installation_location if end_use is not None else None,
@@ -269,6 +297,8 @@ def assemble_review_context(
         "red_flag_total_points": 0,
         "any_red_flags": False,
         "red_flag_ids": "",
+        "red_flag_actions": "",
+        "red_flag_requires_legal": False,
         # Overall risk facts (populated by the risk engine)
         "risk_level": None,
         "risk_total": None,
@@ -331,6 +361,12 @@ def run_risk_engine(
             "red_flag_total_points": float(red_flags.total_points),
             "any_red_flags": bool(red_flags.findings),
             "red_flag_ids": ",".join(finding.rule_id for finding in red_flags.findings),
+            "red_flag_actions": ",".join(
+                sorted({finding.action for finding in red_flags.findings if finding.action})
+            ),
+            "red_flag_requires_legal": any(
+                finding.action == "LEGAL_REVIEW_REQUIRED" for finding in red_flags.findings
+            ),
         }
     )
 
@@ -453,4 +489,3 @@ def jurisdiction_requires_attention(status: str | None) -> bool:
 
 def jurisdiction_is_possible(status: str | None) -> bool:
     return status == JURISDICTION_POSSIBLE
-

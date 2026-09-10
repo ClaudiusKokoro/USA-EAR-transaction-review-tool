@@ -139,3 +139,111 @@ def test_jurisdiction_insufficient_cannot_be_auto_complete():
     )
     decision = run_review_queue(context)
     assert decision.decision in {"LEGAL_REVIEW_REQUIRED", "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED"}
+
+
+def _de_minimis_context(ratio: float):
+    context = _low_risk_context()
+    context.update(
+        {
+            "jurisdiction_path": "FOREIGN_US_CONTENT",
+            "de_minimis_computed": True,
+            "de_minimis_ratio": ratio,
+            "has_us_content": True,
+        }
+    )
+    return context
+
+
+def test_de_minimis_ratio_is_scored_by_magnitude():
+    small, _ = run_risk_engine(_de_minimis_context(0.06))
+    large, _ = run_risk_engine(_de_minimis_context(0.60))
+    small_points = small.categories["jurisdiction"].points
+    large_points = large.categories["jurisdiction"].points
+    assert large_points > small_points
+    small_rules = {finding.rule_id for finding in small.categories["jurisdiction"].findings}
+    large_rules = {finding.rule_id for finding in large.categories["jurisdiction"].findings}
+    assert "JUR-05" in small_rules
+    assert "JUR-07" in large_rules
+    assert large.total > small.total
+
+
+def test_incomplete_de_minimis_scores_and_routes():
+    context = _low_risk_context()
+    context.update(
+        {
+            "jurisdiction_path": "FOREIGN_US_CONTENT",
+            "has_us_content": True,
+            "de_minimis_computed": False,
+            "de_minimis_ratio": None,
+        }
+    )
+    assessment, enriched = run_risk_engine(context)
+    rules = {finding.rule_id for finding in assessment.categories["jurisdiction"].findings}
+    assert "JUR-08" in rules
+    assert enriched["red_flag_requires_legal"] is False
+    decision = run_review_queue(enriched, risk=assessment)
+    assert decision.decision == "COMPLIANCE_REVIEW_REQUIRED"
+
+
+def test_red_flag_action_requires_legal_review():
+    context = _low_risk_context()
+    context.update({"risk_level": "LOW", "risk_total": 10, "red_flag_requires_legal": True})
+    decision = run_review_queue(context)
+    assert decision.decision == "LEGAL_REVIEW_REQUIRED"
+    assert decision.matched_rule_id == "RQ-07"
+
+
+def test_buyer_in_embargoed_country_scores_destination_risk():
+    context = _low_risk_context()
+    context.update({"buyer_country_embargoed": True, "destination_embargoed": False})
+    assessment, _ = run_risk_engine(context)
+    rules = {finding.rule_id for finding in assessment.categories["destination"].findings}
+    assert "DST-04" in rules
+
+
+def _product(description: str, eccn: str | None = None):
+    from app.models.product import ProductInformation
+
+    return ProductInformation(
+        product_name="Test product",
+        product_description=description,
+        existing_eccn=eccn,
+        existing_ear_status="Not determined" if eccn is None else "Controlled (ECCN)",
+    )
+
+
+def test_encryption_context_fact_detects_capability_without_classification():
+    context = assemble_review_context(
+        transaction=_low_risk_context_transaction(),
+        product=_product("Commercial encryption toolkit for enterprise data pipelines"),
+    )
+    assert context["encryption_without_classification"] is True
+
+
+def test_encryption_context_fact_ignores_negated_wording():
+    context = assemble_review_context(
+        transaction=_low_risk_context_transaction(),
+        product=_product("Bench multimeter shipped with no encryption features"),
+    )
+    assert context["encryption_without_classification"] is False
+
+
+def test_encryption_context_fact_ignores_items_with_an_eccn():
+    context = assemble_review_context(
+        transaction=_low_risk_context_transaction(),
+        product=_product("Commercial encryption toolkit", eccn="5D002"),
+    )
+    assert context["encryption_without_classification"] is False
+
+
+def _low_risk_context_transaction():
+    return TransactionIntake(
+        transaction_name="Encryption context sample",
+        exporter_name="Test Exporter",
+        exporter_country="US",
+        buyer_name="Known Buyer GmbH",
+        buyer_country="DE",
+        ultimate_end_user="End Customer AG",
+        ultimate_destination="DE",
+        transaction_value="1000.00",
+    )

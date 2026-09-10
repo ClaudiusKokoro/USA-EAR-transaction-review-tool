@@ -117,6 +117,8 @@ def run_de_minimis(
 
     included_value = Decimal("0")
     missing_value_names: list[str] = []
+    zero_value_names: list[str] = []
+    production_only_names: list[str] = []
     excluded: list[str] = []
     for component in parsed:
         is_us = _is_us_origin(component.origin)
@@ -126,8 +128,20 @@ def run_de_minimis(
                 f"{component.component_name} (origin '{component.origin or 'not provided'}' is not recognized as U.S.-origin)"
             )
             continue
+        if component.incorporated is False:
+            production_only_names.append(component.component_name)
+            excluded.append(
+                f"{component.component_name} (recorded as used in production only, not incorporated into the item)"
+            )
+            continue
         if controlled and component.component_value in (None, ""):
             missing_value_names.append(component.component_name)
+            continue
+        if controlled and component.component_value == 0:
+            zero_value_names.append(component.component_name)
+            excluded.append(
+                f"{component.component_name} (controlled U.S.-origin component recorded with a zero value)"
+            )
             continue
         if controlled:
             included_value += component.component_value
@@ -145,6 +159,25 @@ def run_de_minimis(
 
     result.excluded_components = excluded
     result.controlled_us_content_value = included_value
+
+    if production_only_names:
+        result.warnings.append(
+            "Component(s) recorded as used in production only were excluded from the de minimis numerator: "
+            + ", ".join(production_only_names)
+            + ". Production inputs are assessed in the FDP step instead."
+        )
+    if zero_value_names:
+        result.warnings.append(
+            "Controlled U.S.-origin component(s) recorded with a zero value were not counted: "
+            + ", ".join(zero_value_names)
+            + ". Confirm whether a value should be recorded before relying on this ratio."
+        )
+    if any(component.incorporated is None and _is_us_origin(component.origin) for component in parsed):
+        result.notes.append(
+            "One or more U.S.-origin components do not record whether they are incorporated into the item "
+            "or were only used in production. Confirm this, because only incorporated controlled content "
+            "belongs in the de minimis numerator."
+        )
 
     if missing_value_names:
         result.status = DE_MINIMIS_MISSING_VALUE
@@ -168,6 +201,11 @@ def run_de_minimis(
     result.ratio = ratio
     result.ratio_percent = ratio * 100
     result.status = DE_MINIMIS_COMPUTED
+    if ratio > 1:
+        result.warnings.append(
+            "The recorded U.S.-origin controlled content value is greater than the total value of the "
+            "foreign-produced item, which makes the ratio exceed 100%. Confirm the recorded values."
+        )
     result.notes.append(
         "The ratio is: controlled U.S.-origin content value / total foreign-product value. "
         "Whether the applicable legal threshold is exceeded requires legal review."

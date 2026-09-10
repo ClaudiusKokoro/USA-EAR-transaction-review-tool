@@ -59,6 +59,9 @@ class DeMinimisComponent(ToolModel):
     eccn: str | None = Field(default=None, max_length=20)
     controlled_status: str = Field(default="Unknown", max_length=40)
     component_value: Decimal | None = Field(default=None, ge=0)
+    # Whether the component is incorporated into the item (counts for de minimis) or
+    # was only used in the production process (an FDP question). None = not recorded.
+    incorporated: bool | None = None
 
     @field_validator("component_name", "origin", "eccn", mode="before")
     @classmethod
@@ -79,6 +82,22 @@ class DeMinimisComponent(ToolModel):
     @classmethod
     def _upper_eccn(cls, value):
         return value.upper() if value else value
+
+    @field_validator("incorporated", mode="before")
+    @classmethod
+    def _blank_bool(cls, value):
+        if value in ("", None):
+            return None
+        if isinstance(value, bool):
+            return value
+        text = str(value).strip().casefold()
+        if text.startswith("unknown") or text in {"n/a", "na", "tbd"}:
+            return None
+        if text.startswith("yes") or text.startswith("true"):
+            return True
+        if text.startswith("no") or text.startswith("false"):
+            return False
+        return None
 
 
 class DeMinimisResult(ToolModel):

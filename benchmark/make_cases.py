@@ -94,6 +94,7 @@ BASE: dict = {
     },
     "expected": {},
     "known_issues": [],
+    "resolved_notes": [],
     "reviewer_notes": "",
 }
 
@@ -116,6 +117,7 @@ def case(
     control: bool = False,
     notes: str = "",
     known_issues: list[str] | None = None,
+    resolved_notes: list[str] | None = None,
     step1: dict | None = None,
     step2: dict | None = None,
     step3: dict | None = None,
@@ -132,6 +134,7 @@ def case(
     item["is_control_case"] = control
     item["reviewer_notes"] = notes
     item["known_issues"] = list(known_issues or [])
+    item["resolved_notes"] = list(resolved_notes or [])
     _merge(item["step1_transaction"], {"transaction_name": f"TEST-{case_id}", **(step1 or {})})
     _merge(item["step2_product"], step2 or {})
     _merge(item["step3_jurisdiction"], step3 or {})
@@ -622,7 +625,8 @@ def build_cases() -> list[dict]:
                 "deminimis_status": "COMPUTED",
                 "deminimis_ratio": 0.4,
                 "red_flags_should_include": ["RF007"],
-                "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED",
+                "risk_level_min": "MODERATE",
+                "queue_decision": "LEGAL_REVIEW_REQUIRED",
             },
             step3=foreign_with_us_content,
             step4={
@@ -637,12 +641,11 @@ def build_cases() -> list[dict]:
                 ],
                 "total_foreign_product_value": 250000.0,
             },
-            known_issues=[
-                "A 40% U.S.-content ratio scores only LOW (19/100): the risk engine caps the "
-                "red-flag category at 10 points, so the size of the ratio does not raise the band.",
-                "Red flag RF007 declares the action LEGAL_REVIEW_REQUIRED, but the review queue "
-                "rule RQ-07 routes any red flag to COMPLIANCE_REVIEW_REQUIRED instead. The queue "
-                "never reads the action field of a red flag.",
+            resolved_notes=[
+                "De minimis ratios are now scored by magnitude (JUR-05/06/07), so 40% content is no "
+                "longer in the same band as a 5% ratio.",
+                "The queue now reads red flag actions (RQ-07), so a red flag carrying "
+                "LEGAL_REVIEW_REQUIRED routes to legal review.",
             ],
         )
     )
@@ -979,12 +982,11 @@ def build_cases() -> list[dict]:
                 "queue_decision": "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED",
             },
             step1={"ultimate_destination": "IR", "buyer_country": "IR", "buyer_name": "Tehran Industrial Supply"},
-            known_issues=[
-                "An embargoed destination case scores MODERATE (36/100), not HIGH: the destination "
-                "category caps at 15 points and the red-flag category at 10 points even though the "
-                "embargo red flag itself carries 25 points.",
-                "The queue outcome is still correct - RQ-03 escalates any embargoed destination to "
-                "EXTERNAL_COUNSEL_REVIEW_RECOMMENDED regardless of the score band.",
+            resolved_notes=[
+                "The red-flag category cap was raised to 15 points, so an embargoed destination now "
+                "reaches the ELEVATED band instead of MODERATE.",
+                "The buyer's country now also raises RF012 and DST-04, so a buyer in an embargoed "
+                "country is reported even when the ultimate destination is elsewhere.",
             ],
         )
     )
@@ -1032,7 +1034,12 @@ def build_cases() -> list[dict]:
             "DST-06",
             "Buyer located in an embargoed country but ultimate destination is elsewhere",
             "destination",
-            expected={"red_flags_should_not_include": ["RF003"]},
+            expected={
+                "red_flags_should_not_include": ["RF003"],
+                "red_flags_should_include": ["RF012"],
+                "queue_decision": "LEGAL_REVIEW_REQUIRED",
+                "risk_level_min": "MODERATE",
+            },
             difficulty="hard",
             step1={
                 "buyer_country": "IR",
@@ -1040,8 +1047,8 @@ def build_cases() -> list[dict]:
                 "ultimate_destination": "DE",
             },
             notes=(
-                "Documented behaviour: the embargo check uses ultimate_destination only. "
-                "This case records the current behaviour so a reviewer can decide whether it is a gap."
+                "The destination-based embargo flag (RF003) still uses ultimate_destination only, but "
+                "the buyer's country is now reported separately through RF012 and DST-04."
             ),
         )
     )
@@ -1467,6 +1474,7 @@ def build_cases() -> list[dict]:
                 "deminimis_ratio": 0.2,
                 "fdp_flag": "POTENTIAL_FDP_ISSUE",
                 "red_flags_should_include": ["RF007", "RF008"],
+                "warnings_should_include": ["incorporated"],
                 "queue_decision_min": "LEGAL_REVIEW_REQUIRED",
             },
             difficulty="hard",
@@ -1494,11 +1502,10 @@ def build_cases() -> list[dict]:
                 "foreign_production_facilities": "Bengaluru development centre, India",
                 "production_process_description": "Source build, signing and packaging pipeline",
             },
-            known_issues=[
-                "The de minimis step accepts a component row for software that was only *used in "
-                "production* rather than incorporated into the item. Here that inflates the ratio to "
-                "20% and triggers RF007 even though the case is really an FDP question; the tool "
-                "never asks the reviewer to distinguish the two.",
+            resolved_notes=[
+                "Component rows can now be marked 'incorporated into the item' or 'used in production "
+                "only'. This case leaves it unrecorded, so the value is still counted but the reviewer "
+                "is told to confirm it; marking it production-only excludes it (see DMX-12).",
             ],
         )
     )
@@ -1581,8 +1588,9 @@ def build_cases() -> list[dict]:
             "Warehouse robot software containing the word guidance",
             "software",
             expected={
-                "red_flags_should_include": ["RF004"],
-                "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED",
+                "red_flags_should_not_include": ["RF004"],
+                "risk_level_exact": "LOW",
+                "queue_decision": "AUTO_REVIEW_COMPLETE",
             },
             difficulty="hard",
             step2={
@@ -1597,10 +1605,10 @@ def build_cases() -> list[dict]:
                 "declared_end_use": "Route guidance for autonomous forklifts in a distribution centre",
                 "industry": "Warehouse automation",
             },
-            known_issues=[
-                "'guidance' is on the military keyword list, so a purely civilian warehouse product "
-                "raises RF004 and a military end-use flag. Flagging for human review is intentional, "
-                "but it is a false positive worth knowing about.",
+            resolved_notes=[
+                "'guidance' is a context-dependent term now: it only counts as a military indicator "
+                "when a strong term (military, missile, weapon, ...) appears in the same text, so "
+                "civilian warehouse software is no longer flagged.",
             ],
         )
     )
@@ -1639,7 +1647,9 @@ def build_cases() -> list[dict]:
             "software",
             expected={
                 "deminimis_status": "MISSING_VALUE",
+                "red_flags_should_include": ["RF010"],
                 "red_flags_should_not_include": ["RF007"],
+                "queue_decision": "COMPLIANCE_REVIEW_REQUIRED",
             },
             difficulty="hard",
             step3={
@@ -1652,10 +1662,9 @@ def build_cases() -> list[dict]:
                 "components": [comp("U.S.-origin report engine licence", "US", value=None, eccn="5D002")],
                 "total_foreign_product_value": 1000000.0,
             },
-            known_issues=[
-                "Missing de minimis data raises no red flag of its own: with the jurisdiction "
-                "questions otherwise complete this case still reaches AUTO_REVIEW_COMPLETE even "
-                "though the ratio cannot be calculated.",
+            resolved_notes=[
+                "An incomplete de minimis calculation now raises RF010 and scores JUR-08, so the "
+                "review routes to compliance instead of completing automatically.",
             ],
         )
     )
@@ -1745,8 +1754,9 @@ def build_cases() -> list[dict]:
             "Marketing software containing the word targeting",
             "software",
             expected={
-                "red_flags_should_include": ["RF004"],
-                "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED",
+                "red_flags_should_not_include": ["RF004"],
+                "risk_level_exact": "LOW",
+                "queue_decision": "AUTO_REVIEW_COMPLETE",
             },
             difficulty="hard",
             step2={
@@ -1761,9 +1771,9 @@ def build_cases() -> list[dict]:
                 "declared_end_use": "Audience targeting for retail marketing campaigns",
                 "industry": "Marketing technology",
             },
-            known_issues=[
-                "'targeting' is on the military keyword list, so commercial advertising software is "
-                "flagged by RF004. Same keyword-noise pattern as SW-08.",
+            resolved_notes=[
+                "'targeting' is now treated as a weak term, so commercial advertising copy no longer "
+                "raises RF004 unless a strong military term is also present.",
             ],
         )
     )
@@ -1795,6 +1805,60 @@ def build_cases() -> list[dict]:
             ],
         )
     )
+    cases.append(
+        case(
+            "SW-16",
+            "Encryption capability described in the product text with no ECCN recorded",
+            "software",
+            expected={
+                "red_flags_should_include": ["RF011"],
+                "risk_category_points_min": {"product": 10},
+                "queue_decision_min": "COMPLIANCE_REVIEW_REQUIRED",
+            },
+            step2={
+                **software_product,
+                "product_name": "Helios Secure Channel",
+                "product_description": (
+                    "Commercial encryption toolkit providing AES-256 transport encryption and key "
+                    "management for enterprise data pipelines."
+                ),
+                "existing_eccn": None,
+                "existing_ear_status": "Not determined",
+            },
+            step7={
+                "declared_end_use": "Protecting internal database traffic inside a corporate network",
+                "industry": "Software",
+            },
+            notes="Same product as SW-02, but without the 5D002 classification: RF011 asks for classification.",
+        )
+    )
+    cases.append(
+        case(
+            "SW-17",
+            "U.S. software component without an incorporation record",
+            "software",
+            expected={
+                "deminimis_status": "COMPUTED",
+                "deminimis_ratio": 0.18,
+                "warnings_should_include": ["incorporated"],
+            },
+            difficulty="hard",
+            step3={
+                "is_us_origin": False,
+                "has_us_origin_content": True,
+                "us_content_value_known": True,
+                "total_foreign_value_known": True,
+            },
+            step4={
+                "components": [comp("U.S.-origin analytics SDK licence", "US", value=180000.0)],
+                "total_foreign_product_value": 1000000.0,
+            },
+            notes=(
+                "When a U.S. component does not record whether it is incorporated or production-only, "
+                "it is still counted but the reviewer is told to confirm it."
+            ),
+        )
+    )
 
     # -------------------------------------------------- advanced de minimis
     mixed_components = {
@@ -1810,7 +1874,9 @@ def build_cases() -> list[dict]:
             "deminimis_advanced",
             expected={
                 "deminimis_status": "MISSING_VALUE",
+                "red_flags_should_include": ["RF010"],
                 "red_flags_should_not_include": ["RF007"],
+                "queue_decision": "COMPLIANCE_REVIEW_REQUIRED",
             },
             difficulty="hard",
             step3=mixed_components,
@@ -1824,9 +1890,8 @@ def build_cases() -> list[dict]:
                 ],
                 "total_foreign_product_value": 1000000.0,
             },
-            known_issues=[
-                "Same gap as SW-10: an incomplete ratio raises no red flag, so a transaction with "
-                "un-priceable controlled U.S. content can still auto-complete.",
+            resolved_notes=[
+                "Same fix as SW-10: the incomplete ratio now raises RF010 and cannot auto-complete.",
             ],
         )
     )
@@ -1874,17 +1939,20 @@ def build_cases() -> list[dict]:
             "DMX-04",
             "U.S. content value exceeds the total product value",
             "deminimis_advanced",
-            expected={"deminimis_status": "COMPUTED", "deminimis_ratio": 1.6},
+            expected={
+                "deminimis_status": "COMPUTED",
+                "deminimis_ratio": 1.6,
+                "warnings_should_include": ["greater than the total value"],
+            },
             difficulty="hard",
             step3=mixed_components,
             step4={
                 "components": [comp("U.S.-origin subsystem", "US", value=800000.0)],
                 "total_foreign_product_value": 500000.0,
             },
-            known_issues=[
-                "The calculator does not cap the ratio at 100%: U.S. content above the declared total "
-                "produces 160% and RF007 simply fires. No validation warning flags the internally "
-                "inconsistent inputs.",
+            resolved_notes=[
+                "The ratio is still calculated (160%) but the calculator now warns that the numerator "
+                "exceeds the total value, so the inconsistent inputs are visible in the report.",
             ],
         )
     )
@@ -1964,7 +2032,11 @@ def build_cases() -> list[dict]:
             "DMX-09",
             "Controlled U.S. component recorded with a zero value",
             "deminimis_advanced",
-            expected={"deminimis_status": "NO_CONTROLLED_US_CONTENT", "deminimis_ratio": 0.0},
+            expected={
+                "deminimis_status": "NO_CONTROLLED_US_CONTENT",
+                "deminimis_ratio": 0.0,
+                "warnings_should_include": ["zero value"],
+            },
             difficulty="hard",
             step3=mixed_components,
             step4={
@@ -1977,10 +2049,9 @@ def build_cases() -> list[dict]:
                 ],
                 "total_foreign_product_value": 1000000.0,
             },
-            known_issues=[
-                "A controlled U.S. component entered with value 0 is treated as 'no controlled U.S. "
-                "content' rather than as a missing value, so the ratio comes back as 0% instead of "
-                "asking the reviewer for the real figure.",
+            resolved_notes=[
+                "A zero-value controlled U.S. component is now excluded with an explicit warning that "
+                "names the component, instead of being counted silently as 0%.",
             ],
         )
     )
@@ -2006,6 +2077,60 @@ def build_cases() -> list[dict]:
             },
         )
     )
+    cases.append(
+        case(
+            "DMX-11",
+            "Modest U.S. content share is scored above the 5% marker",
+            "deminimis_advanced",
+            expected={
+                "deminimis_status": "COMPUTED",
+                "deminimis_ratio": 0.07,
+                "red_flags_should_include": ["RF007"],
+                "risk_category_points_min": {"jurisdiction": 12},
+                "risk_level_min": "MODERATE",
+                "queue_decision": "LEGAL_REVIEW_REQUIRED",
+            },
+            difficulty="hard",
+            step3=mixed_components,
+            step4={
+                "components": [comp("U.S.-origin controller", "US", value=70000.0)],
+                "total_foreign_product_value": 1000000.0,
+            },
+            notes="Locks in the graded scoring: 7% content is worth JUR-05 on top of the base U.S.-nexus points.",
+        )
+    )
+    cases.append(
+        case(
+            "DMX-12",
+            "U.S. component recorded as used in production only",
+            "deminimis_advanced",
+            expected={
+                "deminimis_status": "NO_CONTROLLED_US_CONTENT",
+                "deminimis_ratio": 0.0,
+                "warnings_should_include": ["production only"],
+            },
+            difficulty="hard",
+            step3=mixed_components,
+            step4={
+                "components": [
+                    {
+                        "component_name": "U.S.-origin build toolchain licence",
+                        "origin": "US",
+                        "eccn": None,
+                        "controlled_status": "Yes - controlled",
+                        "component_value": 200000.0,
+                        "incorporated": False,
+                    },
+                    comp("German housing", "DE", controlled="No - EAR99", value=60000.0),
+                ],
+                "total_foreign_product_value": 1000000.0,
+            },
+            resolved_notes=[
+                "A component row can now be marked as used in production only, in which case it is "
+                "excluded from the de minimis numerator and assessed in the FDP step instead (SW-04).",
+            ],
+        )
+    )
 
     return cases
 
@@ -2023,30 +2148,18 @@ def main() -> None:
                 "fictitious. Expectations are derived from app/rules/*.json and app/data/country_data.json."
             ),
             "known_issues": [
-                "The size of the de minimis ratio is never scored. RF007 is a boolean test (>= 5%) and "
-                "the red-flag category is capped at 10 points, so ratios of 6.7%, 19%, 60% and even "
-                "160% all return the same LOW 19/100 result (cases SW-11, SW-12, DMX-02, DMX-04).",
-                "An incomplete de minimis calculation raises no red flag of its own. When a controlled "
-                "U.S. component has no recorded value (MISSING_VALUE) the case still reaches "
-                "AUTO_REVIEW_COMPLETE with LOW risk (cases SW-10 and DMX-01).",
-                "Value edge cases are accepted silently: a controlled U.S. component entered with a "
-                "value of 0 is read as 'no controlled U.S. content' (DMX-09), and a numerator larger "
-                "than the declared total produces a 160% ratio with no validation warning (DMX-04).",
-                "The red-flag category is capped at 10 points, so severe red flags (an embargoed "
-                "destination, a high de minimis ratio) cannot lift the score band on their own. "
-                "Routing still escalates because the queue rules read the underlying facts.",
-                "Red flag findings carry an action field (for example LEGAL_REVIEW_REQUIRED) that the "
-                "review queue rules never read; routing uses score bands and derived booleans only.",
-                "The destination embargo check (RF003 / DST-01) reads ultimate_destination only, so a "
-                "buyer in an embargoed country with an ultimate destination elsewhere does not trigger "
-                "the embargo flag. Case DST-06 documents this behaviour.",
-                "Software handling is keyword-only. Civilian software copy containing 'guidance' "
-                "(SW-08) or 'targeting' (SW-14) raises RF004 and a military end-use flag, while "
-                "encryption software is only noticed through a recorded 5D002 - the word 'encryption' "
-                "is not modelled (SW-02).",
-                "The de minimis step accepts a component row for software that was used in production "
-                "rather than incorporated into the item, which can inflate the numerator and trigger "
-                "RF007 on what is really an FDP question (SW-04).",
+                "Military and defense detection is still keyword-based. Weak terms (guidance, "
+                "targeting, radar, drone, uav, rocket, naval, camouflage) need a strong term in the "
+                "same text, but strong terms such as 'military-grade' in marketing copy will still "
+                "raise a review flag.",
+                "Encryption detection is keyword-based and only recognises negations written as "
+                "'no encryption', 'without encryption', 'non-encrypted' or 'not encrypted'. A "
+                "description that mentions encryption in another negative form may still be flagged.",
+                "The transaction model has no concept of electronic delivery, so a software download "
+                "is recorded exactly like a physical shipment (SW-15). No consignee or shipment date "
+                "is required.",
+                "The de minimis ratio above 100% is reported with a warning rather than rejected; a "
+                "reviewer still has to correct the inputs (DMX-04).",
             ],
         },
         "cases": cases,

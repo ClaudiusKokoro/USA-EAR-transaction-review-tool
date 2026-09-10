@@ -69,3 +69,62 @@ def test_output_never_uses_definitive_language():
     assert "no license is required" not in text
     assert "legal review" in text
 
+
+def test_zero_value_component_is_excluded_with_a_warning():
+    result = run_de_minimis(
+        [
+            {
+                "component_name": "Bundled U.S. licence",
+                "origin": "US",
+                "controlled_status": "Yes - controlled",
+                "component_value": 0,
+            }
+        ],
+        total_foreign_product_value=1000,
+    )
+    assert result.status == DE_MINIMIS_NO_CONTROLLED_US_CONTENT
+    assert any("zero value" in warning.lower() for warning in result.warnings)
+    assert result.excluded_components
+
+
+def test_production_only_component_is_excluded_from_the_numerator():
+    result = run_de_minimis(
+        [
+            {
+                "component_name": "U.S. build toolchain licence",
+                "origin": "US",
+                "controlled_status": "Yes - controlled",
+                "component_value": 200000,
+                "incorporated": False,
+            },
+            {
+                "component_name": "U.S. controller board",
+                "origin": "US",
+                "controlled_status": "Yes - controlled",
+                "component_value": 50000,
+                "incorporated": True,
+            },
+        ],
+        total_foreign_product_value=1000000,
+    )
+    assert result.status == DE_MINIMIS_COMPUTED
+    assert float(result.controlled_us_content_value) == 50000.0
+    assert float(result.ratio) == 0.05
+    assert any("production only" in warning.lower() for warning in result.warnings)
+
+
+def test_ratio_above_one_hundred_percent_warns():
+    result = run_de_minimis(
+        [
+            {
+                "component_name": "U.S. subsystem",
+                "origin": "US",
+                "controlled_status": "Yes - controlled",
+                "component_value": 800000,
+            }
+        ],
+        total_foreign_product_value=500000,
+    )
+    assert result.status == DE_MINIMIS_COMPUTED
+    assert float(result.ratio) == 1.6
+    assert any("greater than the total value" in warning.lower() for warning in result.warnings)

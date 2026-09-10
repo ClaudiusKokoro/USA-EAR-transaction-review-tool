@@ -52,13 +52,20 @@
     },
     {
       "rule_id": "RQ-07",
+      "name": "Red flag action requires legal review",
+      "condition": "red_flag_requires_legal == true",
+      "decision": "LEGAL_REVIEW_REQUIRED",
+      "explanation": "At least one triggered red flag carries the action LEGAL_REVIEW_REQUIRED, so the transaction routes to legal review even if the score band is lower."
+    },
+    {
+      "rule_id": "RQ-08",
       "name": "Moderate overall risk or red flags",
       "condition": "risk_level == 'MODERATE' or any_red_flags == true or end_use_insufficient == true or screening_has_possible_match == true",
       "decision": "COMPLIANCE_REVIEW_REQUIRED",
       "explanation": "Moderate risk factors, red flags, possible name matches, or incomplete end-use facts require compliance review before close-out."
     },
     {
-      "rule_id": "RQ-08",
+      "rule_id": "RQ-09",
       "name": "Default auto-review complete",
       "condition": "true",
       "decision": "AUTO_REVIEW_COMPLETE",
@@ -66,4 +73,3 @@
     }
   ]
 }
-

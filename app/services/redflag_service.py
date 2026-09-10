@@ -24,7 +24,22 @@ def evaluate_red_flag_rules(context: dict[str, Any]) -> RedFlagResult:
     for rule in load_red_flag_rules():
         rule_id = str(rule.get("rule_id", "UNKNOWN"))
         condition = str(rule.get("condition", ""))
-        if evaluate_condition(condition, context):
+        try:
+            matched = evaluate_condition(condition, context)
+        except Exception as exc:
+            # A broken or context-incompatible rule should be visible, not fatal.
+            findings.append(
+                RedFlagFinding(
+                    rule_id=rule_id,
+                    name=f"{rule.get('name', rule_id)} (rule error)",
+                    risk_points=Decimal("0"),
+                    action="RULE_ERROR",
+                    explanation=f"Rule could not be evaluated against the recorded facts: {exc}",
+                    condition=condition,
+                )
+            )
+            continue
+        if matched:
             points = Decimal(str(rule.get("risk_points", 0)))
             total += points
             findings.append(
@@ -39,4 +54,3 @@ def evaluate_red_flag_rules(context: dict[str, Any]) -> RedFlagResult:
             )
     findings.sort(key=lambda finding: finding.rule_id)
     return RedFlagResult(findings=findings, total_points=total, rule_count=len(findings))
-

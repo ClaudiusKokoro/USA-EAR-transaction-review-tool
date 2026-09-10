@@ -316,6 +316,13 @@ def build_de_minimis_components(raw_rows: list[dict] | None) -> list[dict]:
             decimal_value = None if value in (None, "", "nan") else Decimal(str(value))
         except Exception:
             decimal_value = None
+        incorporated_raw = str(row.get("incorporated") or "").strip().casefold()
+        if incorporated_raw.startswith("yes"):
+            incorporated: bool | None = True
+        elif incorporated_raw.startswith("no"):
+            incorporated = False
+        else:
+            incorporated = None
         cleaned.append(
             {
                 "component_name": component_name,
@@ -323,6 +330,7 @@ def build_de_minimis_components(raw_rows: list[dict] | None) -> list[dict]:
                 "eccn": nullable_text(row.get("eccn")),
                 "controlled_status": str(row.get("controlled_status") or "Unknown"),
                 "component_value": decimal_value,
+                "incorporated": incorporated,
             }
         )
     return cleaned
@@ -733,6 +741,7 @@ def render_step4() -> None:
                     "eccn": "",
                     "controlled_status": "Unknown",
                     "component_value": 0.0,
+                    "incorporated": "Unknown",
                 }
             ]
         )
@@ -751,6 +760,19 @@ def render_step4() -> None:
                     "No - EAR99",
                     "Unknown",
                 ],
+            ),
+            "incorporated": st.column_config.SelectboxColumn(
+                "Incorporated into the item?",
+                options=[
+                    "Yes - incorporated",
+                    "No - used in production only",
+                    "Unknown",
+                ],
+                help=(
+                    "Only U.S.-origin controlled content that is incorporated into the item counts "
+                    "towards the de minimis ratio. Items used only in production are assessed in the "
+                    "FDP step."
+                ),
             ),
             "component_value": st.column_config.NumberColumn("Value", min_value=0.0, format="%.2f"),
         },

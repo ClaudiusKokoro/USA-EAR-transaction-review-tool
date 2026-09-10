@@ -2,12 +2,12 @@
   "version": 1,
   "description": "Risk Engine configuration. Each category has a maximum point value and a set of additive rules. Points never exceed the category maximum. Edit this file to tune scoring; do not hardcode scoring in Python.",
   "category_scores": {
-    "jurisdiction": { "max": 25 },
+    "jurisdiction": { "max": 20 },
     "product": { "max": 20 },
     "destination": { "max": 15 },
     "end_user": { "max": 20 },
     "end_use": { "max": 10 },
-    "red_flags": { "max": 10 }
+    "red_flags": { "max": 15 }
   },
   "risk_levels": [
     { "min": 0, "max": 20, "label": "LOW", "color": "#1a7f37" },
@@ -45,6 +45,34 @@
         "condition": "jurisdiction_status == 'POSSIBLE_EAR_JURISDICTION' and (has_us_content == true or us_software_used_in_production == true or us_technology_used_in_production == true)",
         "points": 8,
         "explanation": "A U.S.-origin nexus is possible through controlled content or U.S.-origin production inputs; jurisdiction and license requirements cannot be excluded."
+      },
+      {
+        "rule_id": "JUR-05",
+        "name": "De minimis U.S. content between 5% and 10%",
+        "condition": "jurisdiction_path == 'FOREIGN_US_CONTENT' and de_minimis_computed == true and de_minimis_ratio >= 0.05 and de_minimis_ratio < 0.10",
+        "points": 6,
+        "explanation": "The foreign-produced item contains U.S.-origin controlled content at or above the 5% review marker. The applicable legal threshold depends on the ECCNs involved and the destination."
+      },
+      {
+        "rule_id": "JUR-06",
+        "name": "De minimis U.S. content between 10% and 25%",
+        "condition": "jurisdiction_path == 'FOREIGN_US_CONTENT' and de_minimis_computed == true and de_minimis_ratio >= 0.10 and de_minimis_ratio < 0.25",
+        "points": 12,
+        "explanation": "The foreign-produced item contains a substantial share of U.S.-origin controlled content, so the applicable de minimis threshold must be reviewed."
+      },
+      {
+        "rule_id": "JUR-07",
+        "name": "De minimis U.S. content at or above 25%",
+        "condition": "jurisdiction_path == 'FOREIGN_US_CONTENT' and de_minimis_computed == true and de_minimis_ratio >= 0.25",
+        "points": 18,
+        "explanation": "The foreign-produced item contains a large share of U.S.-origin controlled content, at or above a level commonly used as a de minimis threshold. Legal review of the applicable threshold is required."
+      },
+      {
+        "rule_id": "JUR-08",
+        "name": "De minimis calculation incomplete",
+        "condition": "jurisdiction_path == 'FOREIGN_US_CONTENT' and de_minimis_computed == false",
+        "points": 8,
+        "explanation": "The item is recorded as foreign-produced with U.S.-origin content, but the de minimis ratio could not be calculated from the recorded values."
       }
     ],
     "product": [
@@ -75,6 +103,13 @@
         "condition": "product_value_known == false and transaction_value > 0",
         "points": 3,
         "explanation": "The product value is missing, limiting valuation-based checks such as de minimis context."
+      },
+      {
+        "rule_id": "PRD-05",
+        "name": "Encryption capability without a recorded classification",
+        "condition": "encryption_without_classification == true",
+        "points": 10,
+        "explanation": "The product description refers to encryption or cryptography but no ECCN is recorded. Encryption items are frequently controlled (for example ECCN 5A002 or 5D002), so classification should be confirmed."
       }
     ],
     "destination": [
@@ -98,6 +133,13 @@
         "condition": "ultimate_destination == null or strip(str(ultimate_destination)) == ''",
         "points": 8,
         "explanation": "The ultimate destination is unknown, so destination-based risk cannot be assessed."
+      },
+      {
+        "rule_id": "DST-04",
+        "name": "Buyer located in a comprehensively embargoed country",
+        "condition": "buyer_country_embargoed == true and destination_embargoed == false",
+        "points": 10,
+        "explanation": "The buyer is located in a country subject to a comprehensive U.S. embargo program even though the recorded ultimate destination is elsewhere. Review the transaction for diversion risk."
       }
     ],
     "end_user": [
@@ -158,14 +200,14 @@
         "rule_id": "RFS-01",
         "name": "Multiple high-severity red flags",
         "condition": "red_flag_total_points >= 40",
-        "points": 10,
+        "points": 15,
         "explanation": "The Red Flag Engine identified red flags with a combined point value of 40 or more."
       },
       {
         "rule_id": "RFS-02",
         "name": "Red flags requiring action",
         "condition": "red_flag_total_points >= 20 and red_flag_total_points < 40",
-        "points": 8,
+        "points": 10,
         "explanation": "The Red Flag Engine identified red flags with a combined point value between 20 and 39."
       },
       {
@@ -178,4 +220,3 @@
     ]
   }
 }
-
