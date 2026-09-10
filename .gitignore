@@ -30,3 +30,6 @@ app/data/ear_sync_meta.json
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Benchmark output (regenerate with: python benchmark/run_benchmark.py)
+benchmark/results/

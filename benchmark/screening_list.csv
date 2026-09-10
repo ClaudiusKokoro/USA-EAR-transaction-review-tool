@@ -1,0 +1,15 @@
+# Synthetic screening list for the benchmark. All entities are fictitious.
+# Columns: name, aliases, country, reference, source, notes
+name,aliases,country,reference,source,notes
+Vector Trading FZE,Vector Trading;VT Trading FZE,AE,TEST-0001,BENCHMARK,Fictitious benchmark entry
+Orion Microelectronics Ltd.,Orion Micro;OML,CN,TEST-0002,BENCHMARK,Fictitious benchmark entry
+Northgate Defense Systems FZE,Northgate Defense;NDS FZE,RU,TEST-0003,BENCHMARK,Fictitious benchmark entry
+Helios Precision Works,Helios Precision,IR,TEST-0004,BENCHMARK,Fictitious benchmark entry
+Silverline Logistics Group,Silverline Group,IR,TEST-0005,BENCHMARK,Fictitious benchmark entry
+Kestrel Marine Technologies,Kestrel Marine,SG,TEST-0006,BENCHMARK,Fictitious benchmark entry
+Alborz Petrochemical Trading,Alborz Trading,IR,TEST-0007,BENCHMARK,Fictitious benchmark entry
+Zephyr Semiconductor Corp,Zephyr Semi,TW,TEST-0008,BENCHMARK,Fictitious benchmark entry
+Cobalt Aerospace Components LLC,Cobalt Aerospace,CN,TEST-0009,BENCHMARK,Fictitious benchmark entry
+Marisol Shipping and Trading,Marisol Shipping,VE,TEST-0010,BENCHMARK,Fictitious benchmark entry
+Qadr Industrial Solutions,Qadr Industrial,IR,TEST-0011,BENCHMARK,Fictitious benchmark entry
+Vertex Advanced Materials GmbH,Vertex Advanced,DE,TEST-0012,BENCHMARK,Fictitious benchmark entry

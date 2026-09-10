@@ -343,6 +343,28 @@ CI 会在每次 push / PR 时，于 Ubuntu、Windows、macOS 上分别用 Python
 
 ---
 
+## 基准测试（Benchmark）
+
+`benchmark/` 目录包含一份人工编写的测试集，把 **95 笔交易**真正送进审核流水线，
+用来验证程序是否会按它自己的规则把该报警的交易标出来。
+
+```bash
+python benchmark/run_benchmark.py
+python benchmark/run_benchmark.py --family screening --verbose
+```
+
+覆盖范围包括：管辖、De Minimis 边界值（4.9% / 5.0% / 10% / 25% / 超过 100%）、
+软件场景（商业软件、加密软件、含美国 SDK 的外国软件、仅用于生产的美国软件、电子交付、
+关键词陷阱）、FDP、当事方筛查（完全匹配、别名、近似名、英式拼写）、最终用途、禁运
+目的地、多维叠加的高危案例、6 个"必须不报警"的对照案例，以及关键词陷阱。每个用例还会做
+**护栏检查**：筛查状态必须落在三个枚举值内、任何当事方都不会被标为受限方、生成的文本里
+不能出现法律结论性措辞。
+
+整个跑分约 1 秒、不需要联网；有检查失败时退出码非 0，因此 CI 会在每次 push 时自动运行。
+用例家族与跑分发现详见 [benchmark/README.md](benchmark/README.md)。
+
+---
+
 ## 故障排查
 
 **提示 `streamlit` 不是命令** —— 先激活虚拟环境，再执行 `pip install -r requirements.txt`。

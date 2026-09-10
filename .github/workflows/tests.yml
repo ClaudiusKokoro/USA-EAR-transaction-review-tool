@@ -50,3 +50,33 @@ jobs:
           if (-not (Test-Path "start-windows.bat")) { exit 1 }
           if (-not (Test-Path "start-all.bat")) { exit 1 }
         shell: pwsh
+
+  benchmark:
+    name: benchmark (70 cases)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run the EAR review benchmark
+        run: python benchmark/run_benchmark.py
+
+      - name: Upload the benchmark report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark/results/
+          if-no-files-found: ignore

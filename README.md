@@ -435,6 +435,33 @@ Tests cover every engine: condition evaluator, jurisdiction, de minimis, FDP, sc
 pytest
 ```
 
+---
+
+## Benchmark
+
+`benchmark/` contains a hand-authored dataset that pushes 95 transactions
+through the **real review pipeline**, to check whether the tool flags what its
+rules say it should flag.
+
+```bash
+python benchmark/run_benchmark.py
+python benchmark/run_benchmark.py --family screening --verbose
+```
+
+It covers jurisdiction, de minimis boundaries (4.9% / 5.0% / 10% / 25% / above
+100%), software scenarios (commercial, encryption, SDK content, production-only
+software, digital delivery, keyword traps), FDP, screening (exact match, alias,
+near-miss, British spelling), end use, embargoed destinations, stacked
+high-severity cases, six clean control cases, and keyword traps. Every case is
+also checked against the tool's guardrails: screening status stays inside its
+enum, no party is ever labelled restricted, and no generated text contains
+legal-conclusion wording.
+
+The run takes about a second, needs no network access, and exits non-zero when a
+check fails, so CI runs it on every push. See
+[benchmark/README.md](benchmark/README.md) for the case families and the
+calibration findings it surfaced.
+
 ## Troubleshooting
 
 **`streamlit` is not recognized** - activate the virtual environment first, then `pip install -r requirements.txt`.
