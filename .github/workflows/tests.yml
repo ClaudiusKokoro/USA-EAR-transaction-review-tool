@@ -52,7 +52,7 @@ jobs:
         shell: pwsh
 
   benchmark:
-    name: benchmark (70 cases)
+    name: benchmark
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
