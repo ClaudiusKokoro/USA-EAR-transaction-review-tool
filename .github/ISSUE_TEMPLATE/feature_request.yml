@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest an improvement or a new capability
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the review task that is currently difficult or repetitive.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this touch?
+      options:
+        - Rules / scoring engines
+        - Party screening and list sync
+        - AI assistant
+        - Report output
+        - User interface / workflow
+        - Documentation / tooling
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: guardrails
+    attributes:
+      label: Guardrails
+      options:
+        - label: This request does not ask the tool to produce legal conclusions
+          required: true
+        - label: This request can be implemented without bundling paid APIs or real restricted-party data
+          required: true

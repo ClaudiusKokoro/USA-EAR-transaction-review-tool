@@ -10,6 +10,20 @@ EAR 交易审核工具是一个**本地优先（local-first）的 Web 应用**�
 
 > **法律设计原则：** 本工具**永远不会**给出确定性法律结论，例如"这笔交易合法""不需要许可证""违反 EAR"。它只负责收集交易事实、识别缺失信息、套用可配置规则、计算初步风险分数、标出需要人工法律复核的问题，并生成结构化审核报告。
 
+<!--
+## 界面截图
+
+| 审核工作台 | 当事方筛查 |
+| --- | --- |
+| ![步骤 1 交易信息录入](docs/images/01-workbench.png) | ![步骤 6 当事方筛查](docs/images/02-screening.png) |
+
+| 名录中心 | AI 助手 |
+| --- | --- |
+| ![同步官方名单](docs/images/03-list-sync.png) | ![多供应商 AI 助手](docs/images/04-ai-assistant.png) |
+
+图片放进 docs/images/ 之后，把上面的注释标记去掉即可显示。
+-->
+
 ---
 
 ## 环境要求
@@ -364,6 +378,9 @@ pip install -r requirements.txt
 pytest
 streamlit run app/main.py
 ```
+
+完整的开发指南见 [CONTRIBUTING.md](CONTRIBUTING.md)，漏洞上报见
+[SECURITY.md](SECURITY.md)，版本变更见 [CHANGELOG.md](CHANGELOG.md)。
 
 提交 PR 之前，请确认：
 

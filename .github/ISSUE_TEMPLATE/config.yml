@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/ClaudiusKokoro/USA-EAR-transaction-review-tool/blob/main/SECURITY.md
+    about: Please report vulnerabilities privately instead of opening a public issue.
+  - name: Questions about EAR compliance
+    url: https://www.bis.doc.gov/index.php/regulations
+    about: This project does not provide legal advice. Consult the regulations or qualified counsel.
